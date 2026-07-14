@@ -1,6 +1,6 @@
 import typer
 
-from orven.config import ConfigLoadError, load_config
+from orven.config import ConfigLoadError, LoadedConfig, load_config
 
 
 def show_config() -> None:
@@ -11,11 +11,19 @@ def show_config() -> None:
         typer.echo(str(error), err=True)
         raise typer.Exit(code=1) from error
 
+    for line in format_config(loaded_config):
+        typer.echo(line)
+
+
+def format_config(loaded_config: LoadedConfig) -> list[str]:
+    """Return user-facing resolved configuration lines."""
     settings = loaded_config.settings
-    typer.echo(f"Config path: {loaded_config.path}")
-    typer.echo(f"Config exists: {loaded_config.exists}")
-    typer.echo(f"Provider: {settings.provider.name}")
-    typer.echo(f"Provider base URL: {settings.provider.base_url}")
-    typer.echo(f"Provider model: {settings.provider.model or '(not set)'}")
-    typer.echo(f"Skills dir: {settings.skills_dir or '(not set)'}")
-    typer.echo(f"Workflows dir: {settings.workflows_dir or '(not set)'}")
+    return [
+        f"Config path: {loaded_config.path}",
+        f"Config exists: {loaded_config.exists}",
+        f"Provider: {settings.provider.name}",
+        f"Provider base URL: {settings.provider.base_url}",
+        f"Provider model: {settings.provider.model or '(not set)'}",
+        f"Skills dir: {settings.skills_dir or '(not set)'}",
+        f"Workflows dir: {settings.workflows_dir or '(not set)'}",
+    ]

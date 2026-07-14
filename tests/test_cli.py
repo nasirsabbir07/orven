@@ -55,9 +55,18 @@ def test_root_command_shows_slash_help() -> None:
 
     assert result.exit_code == 0
     assert "/help" in result.output
+    assert "/config" in result.output
     assert "/exit" in result.output
     assert "/provider" in result.output
     assert "/providers" in result.output
+
+
+def test_root_command_shows_config() -> None:
+    result = runner.invoke(app, input="/config\n/exit\n")
+
+    assert result.exit_code == 0
+    assert "Config path:" in result.output
+    assert "Provider: ollama" in result.output
 
 
 def test_root_command_lists_providers() -> None:
@@ -105,6 +114,13 @@ def test_run_command_starts_interactive_shell() -> None:
     assert "Type a task, or /help for commands." in result.output
 
 
+def test_chat_command_starts_interactive_shell() -> None:
+    result = runner.invoke(app, ["chat"], input="/exit\n")
+
+    assert result.exit_code == 0
+    assert "Type a task, or /help for commands." in result.output
+
+
 def test_hello_command() -> None:
     result = runner.invoke(app, ["hello"])
 
@@ -117,6 +133,7 @@ def test_help_lists_command_tree() -> None:
 
     assert result.exit_code == 0
     assert "run" in result.output
+    assert "chat" in result.output
     assert "ask" in result.output
     assert "hello" in result.output
     assert "exit" in result.output

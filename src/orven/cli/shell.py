@@ -5,12 +5,15 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import WordCompleter
 import typer
 
+from orven.cli.commands.config import format_config
 from orven.config import ConfigLoadError, load_config, set_provider_model, set_provider_name
-from orven.providers import ModelInfo, ProviderError, ProviderRequest, create_provider
+from orven.core import Agent, Conversation
+from orven.providers import ModelInfo, ProviderError, create_provider
 
 HELP_TEXT = """Commands:
   /help      Show this help
   /clear     Clear the current session view
+  /config    Show resolved configuration
   /current   Show the selected model
   /provider  Select provider
   /providers List supported providers
@@ -24,6 +27,7 @@ SUPPORTED_PROVIDERS = ["ollama"]
 SLASH_COMMANDS = [
     "/help",
     "/clear",
+    "/config",
     "/current",
     "/providers",
     "/provider",
@@ -41,6 +45,7 @@ def run_shell(input_func: InputFunc | None = None) -> None:
     typer.echo("Orven")
     typer.echo("Type a task, or /help for commands. Use /model to select a local model.")
     prompt = input_func or _default_prompt
+    conversation = Conversation()
 
     while True:
         try:
@@ -64,6 +69,9 @@ def run_shell(input_func: InputFunc | None = None) -> None:
         if command == "/clear":
             typer.echo("\x1b[2J\x1b[H", nl=False)
             continue
+        if command == "/config":
+            _show_config()
+            continue
         if command == "/current":
             _show_current_model()
             continue
@@ -83,7 +91,7 @@ def run_shell(input_func: InputFunc | None = None) -> None:
             typer.echo("Hello from Orven!")
             continue
 
-        _send_prompt(user_input)
+        _send_prompt(user_input, conversation)
 
 
 def _default_prompt(message: str) -> str:
@@ -96,16 +104,27 @@ def _default_prompt(message: str) -> str:
     return typer.prompt(message)
 
 
-def _send_prompt(prompt: str) -> None:
+def _send_prompt(prompt: str, conversation: Conversation) -> None:
     try:
         loaded_config = load_config()
         provider = create_provider(loaded_config.settings.provider)
-        response = provider.complete(ProviderRequest(prompt=prompt))
+        response_text = Agent(provider, conversation).respond(prompt)
     except (ConfigLoadError, ProviderError) as error:
         typer.echo(str(error))
         return
 
-    typer.echo(response.text)
+    typer.echo(response_text)
+
+
+def _show_config() -> None:
+    try:
+        loaded_config = load_config()
+    except ConfigLoadError as error:
+        typer.echo(str(error))
+        return
+
+    for line in format_config(loaded_config):
+        typer.echo(line)
 
 
 def _show_current_model() -> None:

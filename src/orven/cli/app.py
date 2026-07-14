@@ -1,7 +1,5 @@
-import typer
-
 from orven.cli.commands import config, doctor, general, model, providers, skills, workflows
-from orven.cli.shell import run_shell
+import typer
 
 app = typer.Typer(invoke_without_command=True)
 
@@ -10,10 +8,11 @@ app = typer.Typer(invoke_without_command=True)
 def main(ctx: typer.Context) -> None:
     """Orven command-line interface."""
     if ctx.invoked_subcommand is None:
-        run_shell()
+        general.chat()
 
 
 app.command()(general.run)
+app.command()(general.chat)
 app.command()(general.ask)
 app.command()(general.hello)
 app.command()(general.exit)
