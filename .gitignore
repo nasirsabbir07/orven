@@ -43,5 +43,6 @@ tempCodeRunnerFile.py
 # Local cache and app state
 .cache/
 
-# graphify's own cache - not part of orven's source
+# graphify's own cache and dated pre-merge backups - not part of orven's source
 graphify-out/cache/
+graphify-out/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
