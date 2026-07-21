@@ -4,20 +4,28 @@ import sys
 import typer
 
 from orven.cli.shell import run_shell
+from orven.cli.tracing import print_turn_receipt
 from orven.config import ConfigLoadError, load_config
 from orven.core import Agent
 from orven.core.tools import ConfirmFunc, ToolRegistry, default_tools
 from orven.providers import ProviderError, create_provider
 
+VERBOSE_OPTION = typer.Option(
+    False,
+    "--verbose",
+    "-v",
+    help="Print a per-turn tool-call receipt (tool invoked, result, stop reason) to stderr.",
+)
 
-def run() -> None:
+
+def run(verbose: bool = VERBOSE_OPTION) -> None:
     """Start an interactive Orven session."""
-    run_shell()
+    run_shell(verbose=verbose)
 
 
-def chat() -> None:
+def chat(verbose: bool = VERBOSE_OPTION) -> None:
     """Start an interactive chat session."""
-    run_shell()
+    run_shell(verbose=verbose)
 
 
 def ask(
@@ -28,6 +36,7 @@ def ask(
         "-y",
         help="Automatically approve tool actions that require confirmation (e.g. writing files).",
     ),
+    verbose: bool = VERBOSE_OPTION,
 ) -> None:
     """Send a prompt to the configured model provider."""
     try:
@@ -38,6 +47,7 @@ def ask(
             tools=ToolRegistry(default_tools()),
             confirm=_make_ask_confirm(auto_yes=yes),
             root_dir=Path.cwd(),
+            on_turn=print_turn_receipt if verbose else None,
         )
         agent.respond(prompt, on_token=lambda token: typer.echo(token, nl=False))
     except (ConfigLoadError, ProviderError) as error:

@@ -7,6 +7,7 @@ from prompt_toolkit.completion import WordCompleter
 import typer
 
 from orven.cli.commands.config import format_config
+from orven.cli.tracing import print_turn_receipt
 from orven.config import ConfigLoadError, load_config, set_provider_model, set_provider_name
 from orven.core import Agent, Conversation
 from orven.core.tools import ToolRegistry, default_tools
@@ -42,7 +43,7 @@ SLASH_COMMANDS = [
 InputFunc = Callable[[str], str]
 
 
-def run_shell(input_func: InputFunc | None = None) -> None:
+def run_shell(input_func: InputFunc | None = None, *, verbose: bool = False) -> None:
     """Run the interactive Orven shell."""
     typer.echo("Orven")
     typer.echo("Type a task, or /help for commands. Use /model to select a local model.")
@@ -98,7 +99,7 @@ def run_shell(input_func: InputFunc | None = None) -> None:
 
         if agent is None:
             try:
-                agent = _build_agent(conversation)
+                agent = _build_agent(conversation, verbose=verbose)
             except (ConfigLoadError, ProviderError) as error:
                 typer.echo(str(error))
                 continue
@@ -116,7 +117,7 @@ def _default_prompt(message: str) -> str:
     return typer.prompt(message)
 
 
-def _build_agent(conversation: Conversation) -> Agent:
+def _build_agent(conversation: Conversation, *, verbose: bool = False) -> Agent:
     loaded_config = load_config()
     provider = create_provider(loaded_config.settings.provider)
     return Agent(
@@ -125,6 +126,7 @@ def _build_agent(conversation: Conversation) -> Agent:
         tools=ToolRegistry(default_tools()),
         confirm=_shell_confirm,
         root_dir=Path.cwd(),
+        on_turn=print_turn_receipt if verbose else None,
     )
 
 

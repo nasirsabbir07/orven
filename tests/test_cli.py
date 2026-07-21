@@ -8,7 +8,15 @@ from orven.cli import shell
 from orven.cli.commands import doctor, general, model
 from orven.config import load_config
 from orven.main import app
-from orven.providers import ChatRequest, ChatResponse, Message, ModelInfo, ProviderError
+from orven.providers import (
+    ChatRequest,
+    ChatResponse,
+    Message,
+    ModelInfo,
+    ProviderError,
+    ToolCall,
+    ToolCallFunction,
+)
 
 runner = CliRunner()
 
@@ -208,6 +216,60 @@ def test_ask_command_reports_provider_errors(monkeypatch: pytest.MonkeyPatch) ->
 
     assert result.exit_code == 1
     assert "provider unavailable" in result.output
+
+
+class ToolCallThenDoneProvider:
+    name = "test"
+
+    def __init__(self) -> None:
+        self._responses = iter(
+            [
+                ChatResponse(
+                    message=Message(
+                        role="assistant",
+                        content="",
+                        tool_calls=[
+                            ToolCall(
+                                id="call_0",
+                                function=ToolCallFunction(name="list_dir", arguments={"path": "."}),
+                            )
+                        ],
+                    ),
+                    model="test-model",
+                    provider="test",
+                ),
+                ChatResponse(message=Message(role="assistant", content="done"), model="test-model", provider="test"),
+            ]
+        )
+
+    def chat(
+        self, request: ChatRequest, *, on_token: Callable[[str], None] | None = None
+    ) -> ChatResponse:
+        response = next(self._responses)
+        if on_token is not None and response.message.content:
+            on_token(response.message.content)
+        return response
+
+    def list_models(self) -> list[ModelInfo]:
+        return []
+
+
+def test_ask_command_prints_turn_receipts_when_verbose(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(general, "create_provider", lambda _: ToolCallThenDoneProvider())
+
+    result = runner.invoke(app, ["ask", "list the directory", "--verbose"])
+
+    assert result.exit_code == 0
+    assert "[turn 0] list_dir(path='.') -> ok:" in result.output
+
+
+def test_ask_command_is_quiet_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(general, "create_provider", lambda _: ToolCallThenDoneProvider())
+
+    result = runner.invoke(app, ["ask", "list the directory"])
+
+    assert result.exit_code == 0
+    assert "[turn" not in result.output
 
 
 def test_model_list_command(monkeypatch: pytest.MonkeyPatch) -> None:

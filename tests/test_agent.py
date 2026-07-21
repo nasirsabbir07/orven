@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from orven.core import Agent
+from orven.core import Agent, TurnRecord
 from orven.core.conversation import ToolCall, ToolCallFunction
 from orven.core.tools import ToolRegistry, default_tools
 from orven.core.tools.filesystem import ListDirTool
@@ -58,8 +58,8 @@ def test_agent_executes_tool_call_and_resends_result(tmp_path: Path) -> None:
 
 
 def test_agent_raises_after_max_iterations_without_executing_final_round(tmp_path: Path) -> None:
-    always_tool_calls = _tool_call_response("list_dir", {"path": "."})
-    provider = ScriptedProvider([always_tool_calls] * 8)
+    varying_tool_calls = [_tool_call_response("list_dir", {"path": str(i)}) for i in range(8)]
+    provider = ScriptedProvider(varying_tool_calls)
 
     calls: list[object] = []
 
@@ -70,10 +70,72 @@ def test_agent_raises_after_max_iterations_without_executing_final_round(tmp_pat
 
     agent = Agent(provider, tools=ToolRegistry([SpyTool()]), root_dir=tmp_path, max_iterations=8)
 
-    with pytest.raises(ProviderError, match="tool-call loop"):
+    with pytest.raises(ProviderError, match="possible tool-call loop"):
         agent.respond("loop forever")
 
     assert len(calls) == 7
+
+
+def test_agent_detects_stagnant_tool_call_loop(tmp_path: Path) -> None:
+    identical_tool_calls = _tool_call_response("list_dir", {"path": "."})
+    provider = ScriptedProvider([identical_tool_calls] * 8)
+
+    calls: list[object] = []
+
+    class SpyTool(ListDirTool):
+        def run(self, args, context):
+            calls.append(args)
+            return super().run(args, context)
+
+    agent = Agent(provider, tools=ToolRegistry([SpyTool()]), root_dir=tmp_path, max_iterations=8)
+
+    with pytest.raises(ProviderError, match="stagnant tool-call loop"):
+        agent.respond("repeat the same call forever")
+
+    assert len(calls) == 1
+
+
+def test_agent_converts_unexpected_tool_error_into_tool_result(tmp_path: Path) -> None:
+    provider = ScriptedProvider(
+        [_tool_call_response("list_dir", {"path": "."}), _final_text("done")]
+    )
+
+    class ExplodingTool(ListDirTool):
+        def run(self, args, context):
+            raise RuntimeError("disk on fire")
+
+    agent = Agent(provider, tools=ToolRegistry([ExplodingTool()]), root_dir=tmp_path)
+
+    assert agent.respond("list a directory") == "done"
+
+    roles = [message.role for message in agent.conversation.messages]
+    assert roles == ["system", "user", "assistant", "tool", "assistant"]
+    tool_message = agent.conversation.messages[3]
+    assert "unexpected error" in tool_message.content
+    assert "disk on fire" in tool_message.content
+
+
+def test_agent_converts_confirmation_error_into_tool_result(tmp_path: Path) -> None:
+    provider = ScriptedProvider(
+        [_tool_call_response("write_file", {"path": "a.txt", "content": "x"}), _final_text("done")]
+    )
+
+    def _broken_confirm(_message: str) -> bool:
+        raise RuntimeError("prompt backend unavailable")
+
+    agent = Agent(
+        provider,
+        tools=ToolRegistry(default_tools()),
+        confirm=_broken_confirm,
+        root_dir=tmp_path,
+    )
+
+    assert agent.respond("write a file") == "done"
+
+    assert not (tmp_path / "a.txt").exists()
+    tool_message = agent.conversation.messages[3]
+    assert "confirmation" in tool_message.content
+    assert "prompt backend unavailable" in tool_message.content
 
 
 def test_write_file_is_skipped_when_confirmation_declined(tmp_path: Path) -> None:
@@ -119,3 +181,66 @@ def test_agent_reports_unknown_tool_without_crashing(tmp_path: Path) -> None:
     assert agent.respond("call a missing tool") == "ok"
     tool_message = agent.conversation.messages[3]
     assert "unknown tool" in tool_message.content
+
+
+def test_agent_emits_turn_receipts_for_tool_call_and_final_answer(tmp_path: Path) -> None:
+    (tmp_path / "x.txt").write_text("hello world")
+    provider = ScriptedProvider(
+        [_tool_call_response("read_file", {"path": "x.txt"}), _final_text("done")]
+    )
+    receipts: list[TurnRecord] = []
+    agent = Agent(
+        provider,
+        tools=ToolRegistry(default_tools()),
+        root_dir=tmp_path,
+        on_turn=receipts.append,
+    )
+
+    agent.respond("read the file")
+
+    assert [receipt.stop_reason for receipt in receipts] == ["continue", "final_answer"]
+
+    first = receipts[0]
+    assert first.requested_tool_calls[0].name == "read_file"
+    assert first.tool_invocations[0].ok is True
+    assert "hello world" in first.tool_invocations[0].result
+
+    assert receipts[1].requested_tool_calls == []
+    assert receipts[1].tool_invocations == []
+
+
+def test_agent_emits_receipt_before_raising_on_stagnant_loop(tmp_path: Path) -> None:
+    identical_tool_calls = _tool_call_response("list_dir", {"path": "."})
+    provider = ScriptedProvider([identical_tool_calls] * 8)
+    receipts: list[TurnRecord] = []
+    agent = Agent(
+        provider,
+        tools=ToolRegistry(default_tools()),
+        root_dir=tmp_path,
+        max_iterations=8,
+        on_turn=receipts.append,
+    )
+
+    with pytest.raises(ProviderError, match="stagnant tool-call loop"):
+        agent.respond("repeat the same call forever")
+
+    assert [receipt.stop_reason for receipt in receipts] == ["continue", "stagnant_loop"]
+    assert receipts[-1].requested_tool_calls[0].name == "list_dir"
+    assert receipts[-1].tool_invocations == []
+
+
+def test_agent_receipt_marks_unknown_tool_invocation_as_not_ok(tmp_path: Path) -> None:
+    provider = ScriptedProvider(
+        [_tool_call_response("does_not_exist", {}), _final_text("ok")]
+    )
+    receipts: list[TurnRecord] = []
+    agent = Agent(
+        provider,
+        tools=ToolRegistry(default_tools()),
+        root_dir=tmp_path,
+        on_turn=receipts.append,
+    )
+
+    agent.respond("call a missing tool")
+
+    assert receipts[0].tool_invocations[0].ok is False
