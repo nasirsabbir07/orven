@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -7,7 +8,7 @@ from orven.cli import shell
 from orven.cli.commands import doctor, general, model
 from orven.config import load_config
 from orven.main import app
-from orven.providers import ModelInfo, ProviderError, ProviderRequest, ProviderResponse
+from orven.providers import ChatRequest, ChatResponse, Message, ModelInfo, ProviderError
 
 runner = CliRunner()
 
@@ -15,7 +16,9 @@ runner = CliRunner()
 class FailingProvider:
     name = "test"
 
-    def complete(self, request: ProviderRequest) -> ProviderResponse:
+    def chat(
+        self, request: ChatRequest, *, on_token: Callable[[str], None] | None = None
+    ) -> ChatResponse:
         raise ProviderError("provider unavailable")
 
     def list_models(self) -> list[ModelInfo]:
@@ -25,8 +28,14 @@ class FailingProvider:
 class ModelListProvider:
     name = "test"
 
-    def complete(self, request: ProviderRequest) -> ProviderResponse:
-        return ProviderResponse(text="ok", model="llama3:8b", provider=self.name)
+    def chat(
+        self, request: ChatRequest, *, on_token: Callable[[str], None] | None = None
+    ) -> ChatResponse:
+        if on_token is not None:
+            on_token("ok")
+        return ChatResponse(
+            message=Message(role="assistant", content="ok"), model="llama3:8b", provider=self.name
+        )
 
     def list_models(self) -> list[ModelInfo]:
         return [ModelInfo(name="llama3:8b"), ModelInfo(name="gemma4:26b")]

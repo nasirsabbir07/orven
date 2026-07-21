@@ -1,9 +1,15 @@
 from orven.providers.base import (
+    ChatRequest,
+    ChatResponse,
+    Message,
+    MessageRole,
     ModelInfo,
     ModelProvider,
     ProviderError,
-    ProviderRequest,
-    ProviderResponse,
+    ToolCall,
+    ToolCallFunction,
+    ToolDefinition,
+    ToolsNotSupportedError,
 )
 from orven.providers.factory import create_provider
 from orven.providers.ollama import OllamaProvider
@@ -13,7 +19,13 @@ __all__ = [
     "ModelInfo",
     "OllamaProvider",
     "ProviderError",
-    "ProviderRequest",
-    "ProviderResponse",
+    "ToolsNotSupportedError",
+    "ChatRequest",
+    "ChatResponse",
+    "ToolDefinition",
+    "Message",
+    "MessageRole",
+    "ToolCall",
+    "ToolCallFunction",
     "create_provider",
 ]

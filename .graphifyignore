@@ -1,0 +1,8 @@
+# Claude Code tooling - not part of orven's own architecture
+.claude/
+
+# Issue backlog - planned work, not shipped code
+issues/
+
+# graphify's own cache - not part of orven's source
+graphify-out/cache/

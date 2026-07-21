@@ -42,3 +42,6 @@ tempCodeRunnerFile.py
 
 # Local cache and app state
 .cache/
+
+# graphify's own cache - not part of orven's source
+graphify-out/cache/

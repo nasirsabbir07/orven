@@ -3,30 +3,38 @@ import pytest
 
 from orven.config import ProviderSettings
 from orven.providers import (
+    ChatRequest,
+    Message,
     OllamaProvider,
     ProviderError,
-    ProviderRequest,
+    ToolDefinition,
+    ToolsNotSupportedError,
     create_provider,
 )
 
 
-def test_ollama_provider_sends_generate_request() -> None:
+def test_ollama_provider_sends_chat_request() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"
-        assert request.url == "http://ollama.test/api/generate"
+        assert request.url == "http://ollama.test/api/chat"
         assert request.read() == (
-            b'{"model":"llama3.2","prompt":"hello","stream":false}'
+            b'{"model":"llama3.2","messages":[{"role":"user","content":"hello"}],'
+            b'"stream":false}'
         )
-        return httpx.Response(200, json={"response": "Hello from Ollama", "model": "llama3.2"})
+        return httpx.Response(
+            200,
+            json={"message": {"role": "assistant", "content": "Hello from Ollama"}, "model": "llama3.2"},
+        )
 
     client = httpx.Client(transport=httpx.MockTransport(handler))
     provider = OllamaProvider(base_url="http://ollama.test", model="llama3.2", client=client)
 
-    response = provider.complete(ProviderRequest(prompt="hello"))
+    response = provider.chat(ChatRequest(messages=[Message(role="user", content="hello")]))
 
-    assert response.text == "Hello from Ollama"
+    assert response.message.content == "Hello from Ollama"
     assert response.model == "llama3.2"
     assert response.provider == "ollama"
+    assert response.has_tool_calls is False
 
 
 def test_ollama_provider_uses_first_local_model_when_unconfigured() -> None:
@@ -34,16 +42,16 @@ def test_ollama_provider_uses_first_local_model_when_unconfigured() -> None:
         if request.url.path == "/api/tags":
             return httpx.Response(200, json={"models": [{"name": "llama3.2"}]})
 
-        assert request.url.path == "/api/generate"
+        assert request.url.path == "/api/chat"
         assert b'"model":"llama3.2"' in request.read()
-        return httpx.Response(200, json={"response": "Hello", "model": "llama3.2"})
+        return httpx.Response(200, json={"message": {"role": "assistant", "content": "Hello"}, "model": "llama3.2"})
 
     client = httpx.Client(transport=httpx.MockTransport(handler))
     provider = OllamaProvider(base_url="http://ollama.test", client=client)
 
-    response = provider.complete(ProviderRequest(prompt="hello"))
+    response = provider.chat(ChatRequest(messages=[Message(role="user", content="hello")]))
 
-    assert response.text == "Hello"
+    assert response.message.content == "Hello"
     assert response.model == "llama3.2"
 
 
@@ -68,7 +76,7 @@ def test_ollama_provider_errors_when_no_local_models_exist() -> None:
     provider = OllamaProvider(base_url="http://ollama.test", client=client)
 
     with pytest.raises(ProviderError, match="No Ollama models are installed"):
-        provider.complete(ProviderRequest(prompt="hello"))
+        provider.chat(ChatRequest(messages=[Message(role="user", content="hello")]))
 
 
 def test_ollama_provider_reports_missing_model() -> None:
@@ -79,7 +87,7 @@ def test_ollama_provider_reports_missing_model() -> None:
     provider = OllamaProvider(base_url="http://ollama.test", model="missing", client=client)
 
     with pytest.raises(ProviderError, match="model not found"):
-        provider.complete(ProviderRequest(prompt="hello"))
+        provider.chat(ChatRequest(messages=[Message(role="user", content="hello")]))
 
 
 def test_ollama_provider_reports_connection_errors() -> None:
@@ -90,7 +98,77 @@ def test_ollama_provider_reports_connection_errors() -> None:
     provider = OllamaProvider(base_url="http://ollama.test", model="llama3.2", client=client)
 
     with pytest.raises(ProviderError, match="Could not connect to Ollama"):
-        provider.complete(ProviderRequest(prompt="hello"))
+        provider.chat(ChatRequest(messages=[Message(role="user", content="hello")]))
+
+
+def test_ollama_provider_streams_tokens() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert b'"stream":true' in request.read()
+        lines = (
+            b'{"message":{"role":"assistant","content":"Hel"},"done":false}\n'
+            b'{"message":{"role":"assistant","content":"lo"},"done":false}\n'
+            b'{"message":{"role":"assistant","content":""},"done":true,"model":"llama3.1"}\n'
+        )
+        return httpx.Response(200, content=lines)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(base_url="http://ollama.test", model="llama3.1", client=client)
+
+    tokens: list[str] = []
+    response = provider.chat(
+        ChatRequest(messages=[Message(role="user", content="hi")]),
+        on_token=tokens.append,
+    )
+
+    assert tokens == ["Hel", "lo"]
+    assert response.message.content == "Hello"
+    assert response.model == "llama3.1"
+
+
+def test_ollama_provider_parses_tool_calls() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert b'"tools"' in request.read()
+        return httpx.Response(
+            200,
+            json={
+                "message": {
+                    "role": "assistant",
+                    "content": "",
+                    "tool_calls": [
+                        {"function": {"name": "read_file", "arguments": {"path": "a.txt"}}}
+                    ],
+                },
+                "model": "qwen2.5",
+            },
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(base_url="http://ollama.test", model="qwen2.5", client=client)
+
+    tool = ToolDefinition(name="read_file", description="Read a file.", parameters={"type": "object"})
+    response = provider.chat(
+        ChatRequest(messages=[Message(role="user", content="read a.txt")], tools=[tool])
+    )
+
+    assert response.has_tool_calls is True
+    assert response.message.tool_calls is not None
+    call = response.message.tool_calls[0]
+    assert call.function.name == "read_file"
+    assert call.function.arguments == {"path": "a.txt"}
+
+
+def test_ollama_provider_raises_tools_not_supported_error() -> None:
+    def handler(_: httpx.Request) -> httpx.Response:
+        return httpx.Response(400, json={"error": "registry.ollama.ai/library/llama2 does not support tools"})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(base_url="http://ollama.test", model="llama2", client=client)
+
+    tool = ToolDefinition(name="read_file", description="Read a file.", parameters={"type": "object"})
+    with pytest.raises(ToolsNotSupportedError, match="does not support tool calls"):
+        provider.chat(
+            ChatRequest(messages=[Message(role="user", content="hi")], tools=[tool])
+        )
 
 
 def test_create_provider_allows_ollama_without_configured_model() -> None:

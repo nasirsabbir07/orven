@@ -1,0 +1,267 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1784313821.5574884,
+    "ast_hash": "598cb075410bcd95220ac90bbb60344a",
+    "semantic_hash": "598cb075410bcd95220ac90bbb60344a"
+  },
+  "pyproject.toml": {
+    "mtime": 1783886298.987173,
+    "ast_hash": "51842974ba6f3474cb23f69c05901871",
+    "semantic_hash": "51842974ba6f3474cb23f69c05901871"
+  },
+  "src/orven/__init__.py": {
+    "mtime": 1783883403.0636594,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "src/orven/cli/__init__.py": {
+    "mtime": 1783961759.083362,
+    "ast_hash": "f4ba117f3a88e1edc9c0e4b7cf679909",
+    "semantic_hash": "f4ba117f3a88e1edc9c0e4b7cf679909"
+  },
+  "src/orven/cli/app.py": {
+    "mtime": 1783998412.604231,
+    "ast_hash": "dd2e0e56eb0485829f0d440bfb29122b",
+    "semantic_hash": "dd2e0e56eb0485829f0d440bfb29122b"
+  },
+  "src/orven/cli/commands/__init__.py": {
+    "mtime": 1783961750.2144847,
+    "ast_hash": "0233bd0abfb7ce79903a6888c987fc2b",
+    "semantic_hash": "0233bd0abfb7ce79903a6888c987fc2b"
+  },
+  "src/orven/cli/commands/config.py": {
+    "mtime": 1783999292.5499322,
+    "ast_hash": "06a3e057e095db2fe6860228b2d025fc",
+    "semantic_hash": "06a3e057e095db2fe6860228b2d025fc"
+  },
+  "src/orven/cli/commands/doctor.py": {
+    "mtime": 1783962152.7760065,
+    "ast_hash": "cca95c8cfdc9a4cecaa85def4f5aedab",
+    "semantic_hash": "cca95c8cfdc9a4cecaa85def4f5aedab"
+  },
+  "src/orven/cli/commands/general.py": {
+    "mtime": 1784137365.154557,
+    "ast_hash": "b376688abe31cfbf64dbe95b65842098",
+    "semantic_hash": "b376688abe31cfbf64dbe95b65842098"
+  },
+  "src/orven/cli/commands/model.py": {
+    "mtime": 1783962395.0186372,
+    "ast_hash": "d4d2d92bfc96262bb53e90abee78ee31",
+    "semantic_hash": "d4d2d92bfc96262bb53e90abee78ee31"
+  },
+  "src/orven/cli/commands/providers.py": {
+    "mtime": 1783962151.9299273,
+    "ast_hash": "db4ed448ea296059aa55e42952c1b6ea",
+    "semantic_hash": "db4ed448ea296059aa55e42952c1b6ea"
+  },
+  "src/orven/cli/commands/skills.py": {
+    "mtime": 1783961754.9260094,
+    "ast_hash": "a1b52343266f6c0b93de07db62b1ecb9",
+    "semantic_hash": "a1b52343266f6c0b93de07db62b1ecb9"
+  },
+  "src/orven/cli/commands/workflows.py": {
+    "mtime": 1783961755.9241154,
+    "ast_hash": "571ea5a05abe52bf1ca106a53707cc77",
+    "semantic_hash": "571ea5a05abe52bf1ca106a53707cc77"
+  },
+  "src/orven/cli/shell.py": {
+    "mtime": 1784137348.7149634,
+    "ast_hash": "e2f05321fb120edc3e1953907e41d019",
+    "semantic_hash": "e2f05321fb120edc3e1953907e41d019"
+  },
+  "src/orven/config/__init__.py": {
+    "mtime": 1783963150.2611728,
+    "ast_hash": "af2c1ed2b221db3cf8506877fe3c5e83",
+    "semantic_hash": "af2c1ed2b221db3cf8506877fe3c5e83"
+  },
+  "src/orven/config/settings.py": {
+    "mtime": 1783963149.280048,
+    "ast_hash": "1df3aab82a8a4d2af2b5e3042a00afb2",
+    "semantic_hash": "1df3aab82a8a4d2af2b5e3042a00afb2"
+  },
+  "src/orven/core/__init__.py": {
+    "mtime": 1784137176.3890536,
+    "ast_hash": "a7d55100bb4fe5ae8f07ca58924c2b30",
+    "semantic_hash": "a7d55100bb4fe5ae8f07ca58924c2b30"
+  },
+  "src/orven/core/agent.py": {
+    "mtime": 1784137173.0942905,
+    "ast_hash": "d4f20d9d48531e2008455c5bef9545cf",
+    "semantic_hash": "d4f20d9d48531e2008455c5bef9545cf"
+  },
+  "src/orven/core/conversation.py": {
+    "mtime": 1784137301.5419655,
+    "ast_hash": "a23e45c60192140752cdf7b5dbe195fc",
+    "semantic_hash": "a23e45c60192140752cdf7b5dbe195fc"
+  },
+  "src/orven/core/tools/__init__.py": {
+    "mtime": 1784137159.315532,
+    "ast_hash": "f0e7b1f3025b778268aab3dd042232d5",
+    "semantic_hash": "f0e7b1f3025b778268aab3dd042232d5"
+  },
+  "src/orven/core/tools/base.py": {
+    "mtime": 1784137134.5579238,
+    "ast_hash": "6a6b3caddd7a52ea606c39a90d4ba790",
+    "semantic_hash": "6a6b3caddd7a52ea606c39a90d4ba790"
+  },
+  "src/orven/core/tools/filesystem.py": {
+    "mtime": 1784137525.380031,
+    "ast_hash": "f9ac0625d0657aed8fef9e1fa695da69",
+    "semantic_hash": "f9ac0625d0657aed8fef9e1fa695da69"
+  },
+  "src/orven/core/tools/registry.py": {
+    "mtime": 1784137156.0309052,
+    "ast_hash": "cdeaaa56bbf048d295e9ed48eb30bf29",
+    "semantic_hash": "cdeaaa56bbf048d295e9ed48eb30bf29"
+  },
+  "src/orven/main.py": {
+    "mtime": 1783961583.5942822,
+    "ast_hash": "fbd609e41ff342b661c36e34ed9d270f",
+    "semantic_hash": "fbd609e41ff342b661c36e34ed9d270f"
+  },
+  "src/orven/providers/__init__.py": {
+    "mtime": 1784137310.678948,
+    "ast_hash": "f910627962329ef61feb18bd97db8f67",
+    "semantic_hash": "f910627962329ef61feb18bd97db8f67"
+  },
+  "src/orven/providers/base.py": {
+    "mtime": 1784137295.0783315,
+    "ast_hash": "95f099336e330bcd9d6d08186b2c5483",
+    "semantic_hash": "95f099336e330bcd9d6d08186b2c5483"
+  },
+  "src/orven/providers/factory.py": {
+    "mtime": 1783962150.1930182,
+    "ast_hash": "bedd2059148c835adaea6c72788a0f49",
+    "semantic_hash": "bedd2059148c835adaea6c72788a0f49"
+  },
+  "src/orven/providers/ollama.py": {
+    "mtime": 1784137305.8524728,
+    "ast_hash": "adc80fd011d067e4cd35af54d19bc62d",
+    "semantic_hash": "adc80fd011d067e4cd35af54d19bc62d"
+  },
+  "tests/test_agent.py": {
+    "mtime": 1784137530.320739,
+    "ast_hash": "a0d481fde724303cc2312e55660a5c41",
+    "semantic_hash": "a0d481fde724303cc2312e55660a5c41"
+  },
+  "tests/test_cli.py": {
+    "mtime": 1784137409.350883,
+    "ast_hash": "ec966fd5246ea19d1e35b77e72b03dae",
+    "semantic_hash": "ec966fd5246ea19d1e35b77e72b03dae"
+  },
+  "tests/test_config.py": {
+    "mtime": 1783963152.1515388,
+    "ast_hash": "198b23af23ecafbb855bbbdf113bb339",
+    "semantic_hash": "198b23af23ecafbb855bbbdf113bb339"
+  },
+  "tests/test_core.py": {
+    "mtime": 1784137401.0495589,
+    "ast_hash": "843b4dcfa6d2ddefc85e1797ec73d66a",
+    "semantic_hash": "843b4dcfa6d2ddefc85e1797ec73d66a"
+  },
+  "tests/test_filesystem_tools.py": {
+    "mtime": 1784137448.261153,
+    "ast_hash": "a961a3630c71c829a3f7b09a6e0a2b40",
+    "semantic_hash": "a961a3630c71c829a3f7b09a6e0a2b40"
+  },
+  "tests/test_providers.py": {
+    "mtime": 1784137388.0108888,
+    "ast_hash": "615e65c697c22996074fb5a54422d0e1",
+    "semantic_hash": "615e65c697c22996074fb5a54422d0e1"
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1784313821.5475,
+    "ast_hash": "c232166e6492ba1ed955030b16979b05",
+    "semantic_hash": "c232166e6492ba1ed955030b16979b05"
+  },
+  ".claude/skills/graphify/SKILL.md": {
+    "mtime": 1784313821.5464866,
+    "ast_hash": "1e48e0226c5b26741c54209a51c94454",
+    "semantic_hash": "1e48e0226c5b26741c54209a51c94454"
+  },
+  ".claude/skills/graphify/references/add-watch.md": {
+    "mtime": 1783255112.928757,
+    "ast_hash": "d59d027fe449f06aa03905a01184e779",
+    "semantic_hash": "d59d027fe449f06aa03905a01184e779"
+  },
+  ".claude/skills/graphify/references/exports.md": {
+    "mtime": 1783255112.928757,
+    "ast_hash": "9da2a2152e60a22f07f05fed5158f287",
+    "semantic_hash": "9da2a2152e60a22f07f05fed5158f287"
+  },
+  ".claude/skills/graphify/references/extraction-spec.md": {
+    "mtime": 1783255112.929921,
+    "ast_hash": "42fef56a01698118f7fd722acdadea34",
+    "semantic_hash": "42fef56a01698118f7fd722acdadea34"
+  },
+  ".claude/skills/graphify/references/github-and-merge.md": {
+    "mtime": 1783255112.9309208,
+    "ast_hash": "cde13df085e4c492aeb7ba298a996d0d",
+    "semantic_hash": "cde13df085e4c492aeb7ba298a996d0d"
+  },
+  ".claude/skills/graphify/references/hooks.md": {
+    "mtime": 1783255112.9319208,
+    "ast_hash": "3f545db6ce646650bb9de588f5512a27",
+    "semantic_hash": "3f545db6ce646650bb9de588f5512a27"
+  },
+  ".claude/skills/graphify/references/query.md": {
+    "mtime": 1783255112.9319208,
+    "ast_hash": "3c46f8ad006874260614ed8657d02307",
+    "semantic_hash": "3c46f8ad006874260614ed8657d02307"
+  },
+  ".claude/skills/graphify/references/transcribe.md": {
+    "mtime": 1783255112.9329205,
+    "ast_hash": "67b6a5fa6c0974e18f60db9f8932fbd8",
+    "semantic_hash": "67b6a5fa6c0974e18f60db9f8932fbd8"
+  },
+  ".claude/skills/graphify/references/update.md": {
+    "mtime": 1783255112.9329205,
+    "ast_hash": "c698309979460d0f02ba616417844399",
+    "semantic_hash": "c698309979460d0f02ba616417844399"
+  },
+  "CLAUDE.md": {
+    "mtime": 1784313821.5564866,
+    "ast_hash": "8a6643a420fdad6bfb583523bc6cef16",
+    "semantic_hash": "8a6643a420fdad6bfb583523bc6cef16"
+  },
+  "README.md": {
+    "mtime": 1783886252.947799,
+    "ast_hash": "2281cb5239ee825a28b4dfe4636f9bb2",
+    "semantic_hash": "2281cb5239ee825a28b4dfe4636f9bb2"
+  },
+  "issues/001-fix-cli-invocation-docs-and-command-shape.md": {
+    "mtime": 1783956284.7062378,
+    "ast_hash": "8fc562c175d5f1dc13818d007e70c713",
+    "semantic_hash": "8fc562c175d5f1dc13818d007e70c713"
+  },
+  "issues/002-add-cli-smoke-tests.md": {
+    "mtime": 1783956285.5695138,
+    "ast_hash": "835d751abdaf4c96da3de822bcc82df0",
+    "semantic_hash": "835d751abdaf4c96da3de822bcc82df0"
+  },
+  "issues/003-introduce-explicit-root-cli-and-subcommands.md": {
+    "mtime": 1783956286.474125,
+    "ast_hash": "154e4c13374ec64833243550625311ee",
+    "semantic_hash": "154e4c13374ec64833243550625311ee"
+  },
+  "issues/004-add-typed-local-configuration-loading.md": {
+    "mtime": 1783956287.4405966,
+    "ast_hash": "f12750d052e77c3711498b971c9a1e29",
+    "semantic_hash": "f12750d052e77c3711498b971c9a1e29"
+  },
+  "issues/005-implement-provider-abstraction-and-ollama-backend.md": {
+    "mtime": 1783956288.299068,
+    "ast_hash": "841bd8a0509dd64e8ac60b04abea78d7",
+    "semantic_hash": "841bd8a0509dd64e8ac60b04abea78d7"
+  },
+  "issues/006-add-skill-and-workflow-discovery.md": {
+    "mtime": 1783956289.2207482,
+    "ast_hash": "0d49a467c87c8b8905c01602ee7fb04c",
+    "semantic_hash": "0d49a467c87c8b8905c01602ee7fb04c"
+  },
+  "issues/README.md": {
+    "mtime": 1783956283.8442323,
+    "ast_hash": "c87c1c57435e1af63ad645cf061a6c2d",
+    "semantic_hash": "c87c1c57435e1af63ad645cf061a6c2d"
+  }
+}

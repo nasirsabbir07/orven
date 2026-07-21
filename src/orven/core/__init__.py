@@ -1,4 +1,4 @@
 from orven.core.agent import Agent
-from orven.core.conversation import Conversation, Message
+from orven.core.conversation import Conversation, Message, ToolCall, ToolCallFunction
 
-__all__ = ["Agent", "Conversation", "Message"]
+__all__ = ["Agent", "Conversation", "Message", "ToolCall", "ToolCallFunction"]

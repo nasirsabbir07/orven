@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from pathlib import Path
 import sys
 
 from prompt_toolkit import PromptSession
@@ -8,6 +9,7 @@ import typer
 from orven.cli.commands.config import format_config
 from orven.config import ConfigLoadError, load_config, set_provider_model, set_provider_name
 from orven.core import Agent, Conversation
+from orven.core.tools import ToolRegistry, default_tools
 from orven.providers import ModelInfo, ProviderError, create_provider
 
 HELP_TEXT = """Commands:
@@ -46,6 +48,7 @@ def run_shell(input_func: InputFunc | None = None) -> None:
     typer.echo("Type a task, or /help for commands. Use /model to select a local model.")
     prompt = input_func or _default_prompt
     conversation = Conversation()
+    agent: Agent | None = None
 
     while True:
         try:
@@ -80,18 +83,27 @@ def run_shell(input_func: InputFunc | None = None) -> None:
             continue
         if command == "/provider":
             _select_provider(prompt)
+            agent = None
             continue
         if command == "/models":
             _show_models()
             continue
         if command == "/model":
             _select_model(prompt)
+            agent = None
             continue
         if command == "hello":
             typer.echo("Hello from Orven!")
             continue
 
-        _send_prompt(user_input, conversation)
+        if agent is None:
+            try:
+                agent = _build_agent(conversation)
+            except (ConfigLoadError, ProviderError) as error:
+                typer.echo(str(error))
+                continue
+
+        _send_prompt(agent, user_input)
 
 
 def _default_prompt(message: str) -> str:
@@ -104,16 +116,38 @@ def _default_prompt(message: str) -> str:
     return typer.prompt(message)
 
 
-def _send_prompt(prompt: str, conversation: Conversation) -> None:
+def _build_agent(conversation: Conversation) -> Agent:
+    loaded_config = load_config()
+    provider = create_provider(loaded_config.settings.provider)
+    return Agent(
+        provider,
+        conversation,
+        tools=ToolRegistry(default_tools()),
+        confirm=_shell_confirm,
+        root_dir=Path.cwd(),
+    )
+
+
+def _shell_confirm(message: str) -> bool:
     try:
-        loaded_config = load_config()
-        provider = create_provider(loaded_config.settings.provider)
-        response_text = Agent(provider, conversation).respond(prompt)
-    except (ConfigLoadError, ProviderError) as error:
+        return typer.confirm(message, default=False)
+    except (typer.Abort, EOFError, KeyboardInterrupt):
+        return False
+
+
+def _send_prompt(agent: Agent, prompt: str) -> None:
+    try:
+        agent.respond(prompt, on_token=lambda token: typer.echo(token, nl=False))
+    except KeyboardInterrupt:
+        typer.echo()
+        typer.echo("Cancelled.")
+        return
+    except ProviderError as error:
+        typer.echo()
         typer.echo(str(error))
         return
 
-    typer.echo(response_text)
+    typer.echo()
 
 
 def _show_config() -> None:
