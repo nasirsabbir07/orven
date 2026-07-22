@@ -15,7 +15,7 @@ DEFAULT_SYSTEM_PROMPT = (
     "You have access to tools for reading files, listing directories, and writing files. "
     "Use tools when they would help answer the user accurately; do not guess about file contents."
 )
-DEFAULT_MAX_ITERATIONS = 8
+DEFAULT_MAX_ITERATIONS = 25
 
 
 class Agent:
