@@ -1,16 +1,16 @@
 # Graph Report - orven  (2026-07-22)
 
 ## Corpus Check
-- 37 files · ~7,580 words
+- 40 files · ~8,595 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 294 nodes · 714 edges · 27 communities (18 shown, 9 thin omitted)
-- Extraction: 71% EXTRACTED · 29% INFERRED · 0% AMBIGUOUS · INFERRED: 206 edges (avg confidence: 0.75)
+- 326 nodes · 823 edges · 27 communities (18 shown, 9 thin omitted)
+- Extraction: 70% EXTRACTED · 30% INFERRED · 0% AMBIGUOUS · INFERRED: 244 edges (avg confidence: 0.75)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `aee79b87`
+- Built from commit: `5c73511c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -37,16 +37,16 @@
 - [[_COMMUNITY_general.py|general.py]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `load_config()` - 32 edges
+1. `load_config()` - 34 edges
 2. `ProviderError` - 30 edges
-3. `Agent` - 25 edges
-4. `ToolRegistry` - 24 edges
-5. `ToolContext` - 23 edges
+3. `Agent` - 28 edges
+4. `ToolContext` - 26 edges
+5. `ToolRegistry` - 26 edges
 6. `Message` - 22 edges
-7. `OllamaProvider` - 19 edges
-8. `ChatRequest` - 18 edges
-9. `ConfigLoadError` - 17 edges
-10. `BaseTool` - 17 edges
+7. `BaseTool` - 19 edges
+8. `OllamaProvider` - 19 edges
+9. `ScriptedProvider` - 19 edges
+10. `default_tools()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `test_default_config_path_uses_orven_config_file()` --calls--> `default_config_path()`  [INFERRED]
@@ -57,8 +57,8 @@
   tests/test_cli.py → src/orven/config/settings.py
 - `test_root_command_selects_provider()` --calls--> `load_config()`  [INFERRED]
   tests/test_cli.py → src/orven/config/settings.py
-- `test_agent_injects_system_prompt_by_default()` --calls--> `Agent`  [INFERRED]
-  tests/test_core.py → src/orven/core/agent.py
+- `test_skills_list_and_show_commands()` --calls--> `load_config()`  [INFERRED]
+  tests/test_cli.py → src/orven/config/settings.py
 
 ## Import Cycles
 - None detected.
@@ -66,35 +66,31 @@
 ## Communities (27 total, 9 thin omitted)
 
 ### Community 0 - "Config & Shell Commands"
-Cohesion: 0.10
-Nodes (47): BaseSettings, InputFunc, format_config(), Return user-facing resolved configuration lines., Show resolved local configuration., show_config(), ask(), Send a prompt to the configured model provider. (+39 more)
+Cohesion: 0.09
+Nodes (51): BaseSettings, InputFunc, format_config(), Return user-facing resolved configuration lines., Show resolved local configuration., show_config(), current_model(), list_models() (+43 more)
 
 ### Community 1 - "Provider Abstraction & Ollama Backend"
-Cohesion: 0.09
-Nodes (33): Client, Exception, HTTPStatusError, Response, ChatRequest, ChatResponse, Message, ModelProvider (+25 more)
+Cohesion: 0.08
+Nodes (38): ABC, Client, Exception, HTTPStatusError, Response, ProviderSettings, ChatRequest, ChatResponse (+30 more)
 
 ### Community 2 - "Tool Base & Filesystem Tools"
-Cohesion: 0.17
-Nodes (24): ABC, BaseModel, BaseTool, Any, Execute the tool with validated arguments., ToolContext, ToolResult, ListDirArgs (+16 more)
+Cohesion: 0.15
+Nodes (25): BaseModel, BaseTool, Any, Execute the tool with validated arguments., ToolContext, ToolResult, ListDirArgs, ListDirTool (+17 more)
 
 ### Community 3 - "CLI Doctor & Entry Tests"
-Cohesion: 0.08
-Nodes (19): doctor(), Check the local Orven environment., ModelInfo, Return models available to this provider., FailingProvider, ModelListProvider, MonkeyPatch, Path (+11 more)
+Cohesion: 0.07
+Nodes (20): doctor(), Check the local Orven environment., ModelInfo, Return models available to this provider., FailingProvider, ModelListProvider, MonkeyPatch, Path (+12 more)
 
 ### Community 4 - "Agent Execution & Tool Registry"
 Cohesion: 0.31
-Nodes (19): Agent, default_tools(), Tools enabled by default. Additional tools (e.g. run_shell) can be appended here, ToolRegistry, _final_text(), Path, ScriptedProvider, test_agent_converts_confirmation_error_into_tool_result() (+11 more)
-
-### Community 5 - "Model & Provider Selection Commands"
-Cohesion: 0.19
-Nodes (12): current_model(), list_models(), List models available from the configured provider., Show the currently selected model., Select the model Orven should use., set_model(), list_providers(), List configured model providers. (+4 more)
+Nodes (23): ask(), Send a prompt to the configured model provider., Agent, default_tools(), Tools enabled by default. Additional tools (e.g. run_shell) can be appended here, ToolRegistry, _final_text(), Path (+15 more)
 
 ### Community 6 - "Conversation History"
-Cohesion: 0.15
-Nodes (7): OnTurnFunc, ConfirmFunc, Path, Conversation, EchoProvider, test_agent_injects_system_prompt_by_default(), test_agent_records_conversation_messages()
+Cohesion: 0.24
+Nodes (4): Conversation, EchoProvider, test_agent_injects_system_prompt_by_default(), test_agent_records_conversation_messages()
 
 ### Community 7 - "General CLI Commands"
-Cohesion: 0.21
+Cohesion: 0.19
 Nodes (9): print_turn_receipt(), Print a one-line-per-tool-call summary of a turn to stderr., _truncate(), _describe_tool_call(), _tool_call_signature(), ToolCallRequest, ToolInvocationRecord, TurnRecord (+1 more)
 
 ### Community 8 - "README Project Overview"
@@ -104,6 +100,10 @@ Nodes (9): Current Status, Development Dependencies, Local Development, Orven, P
 ### Community 9 - "CLI App Entrypoint"
 Cohesion: 0.50
 Nodes (3): Context, main(), Orven command-line interface.
+
+### Community 10 - "Skills Command"
+Cohesion: 0.13
+Nodes (27): OnTurnFunc, _discover(), list_skills(), List discovered local skills., Show the full instructions for a local skill., show_skill(), ConfirmFunc, Path (+19 more)
 
 ### Community 26 - "general.py"
 Cohesion: 0.22
@@ -117,17 +117,17 @@ Nodes (6): chat(), _make_ask_confirm(), ConfirmFunc, Start an interactive Orven 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `load_config()` connect `Config & Shell Commands` to `CLI Doctor & Entry Tests`, `Model & Provider Selection Commands`?**
-  _High betweenness centrality (0.178) - this node is a cross-community bridge._
-- **Why does `ProviderError` connect `Provider Abstraction & Ollama Backend` to `Config & Shell Commands`, `CLI Doctor & Entry Tests`, `Agent Execution & Tool Registry`, `Model & Provider Selection Commands`, `General CLI Commands`?**
-  _High betweenness centrality (0.133) - this node is a cross-community bridge._
-- **Why does `ask()` connect `Config & Shell Commands` to `Provider Abstraction & Ollama Backend`, `general.py`, `Agent Execution & Tool Registry`, `Model & Provider Selection Commands`?**
-  _High betweenness centrality (0.081) - this node is a cross-community bridge._
-- **Are the 22 inferred relationships involving `load_config()` (e.g. with `show_config()` and `doctor()`) actually correct?**
-  _`load_config()` has 22 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `load_config()` connect `Config & Shell Commands` to `Skills Command`, `CLI Doctor & Entry Tests`, `Agent Execution & Tool Registry`, `Model & Provider Selection Commands`?**
+  _High betweenness centrality (0.196) - this node is a cross-community bridge._
+- **Why does `ProviderError` connect `Provider Abstraction & Ollama Backend` to `Config & Shell Commands`, `CLI Doctor & Entry Tests`, `Agent Execution & Tool Registry`, `General CLI Commands`?**
+  _High betweenness centrality (0.121) - this node is a cross-community bridge._
+- **Why does `ask()` connect `Agent Execution & Tool Registry` to `Config & Shell Commands`, `Provider Abstraction & Ollama Backend`, `general.py`, `Skills Command`?**
+  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+- **Are the 24 inferred relationships involving `load_config()` (e.g. with `show_config()` and `doctor()`) actually correct?**
+  _`load_config()` has 24 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 19 inferred relationships involving `ProviderError` (e.g. with `doctor()` and `ask()`) actually correct?**
   _`ProviderError` has 19 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 18 inferred relationships involving `Agent` (e.g. with `ask()` and `Conversation`) actually correct?**
-  _`Agent` has 18 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 17 inferred relationships involving `ToolRegistry` (e.g. with `ask()` and `_build_agent()`) actually correct?**
-  _`ToolRegistry` has 17 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 21 inferred relationships involving `Agent` (e.g. with `ask()` and `Conversation`) actually correct?**
+  _`Agent` has 21 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 16 inferred relationships involving `ToolContext` (e.g. with `ListDirArgs` and `ListDirTool`) actually correct?**
+  _`ToolContext` has 16 INFERRED edges - model-reasoned connections that need verification._

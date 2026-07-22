@@ -5,7 +5,7 @@ import pytest
 from typer.testing import CliRunner
 
 from orven.cli import shell
-from orven.cli.commands import doctor, general, model
+from orven.cli.commands import doctor, general, model, skills
 from orven.config import load_config
 from orven.main import app
 from orven.providers import (
@@ -180,6 +180,37 @@ def test_provider_skill_and_workflow_list_commands() -> None:
     assert "No local skills" in skill_result.output
     assert workflow_result.exit_code == 0
     assert "No local workflows" in workflow_result.output
+
+
+def test_skills_list_and_show_commands(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    skills_dir = tmp_path / "skills"
+    skill_dir = skills_dir / "code-review"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        "\n".join(
+            [
+                "---",
+                "name: code-review",
+                "description: Reviews code for bugs.",
+                "---",
+                "Check for edge cases and off-by-one errors.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setattr(skills, "load_config", lambda: load_config(config_path))
+    monkeypatch.setenv("ORVEN_SKILLS_DIR", str(skills_dir))
+
+    list_result = runner.invoke(app, ["skills", "list"])
+    show_result = runner.invoke(app, ["skills", "show", "code-review"])
+    missing_result = runner.invoke(app, ["skills", "show", "does-not-exist"])
+
+    assert list_result.exit_code == 0
+    assert "code-review: Reviews code for bugs." in list_result.output
+    assert show_result.exit_code == 0
+    assert "Check for edge cases and off-by-one errors." in show_result.output
+    assert missing_result.exit_code == 1
 
 
 def test_doctor_command() -> None:

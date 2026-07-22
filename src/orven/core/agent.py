@@ -3,8 +3,9 @@ from collections.abc import Callable
 from pathlib import Path
 
 from orven.core.conversation import Conversation, ToolCall
-from orven.core.tools import ConfirmFunc, ToolContext, ToolRegistry
-from orven.core.trace import ToolCallRequest, ToolInvocationRecord, TurnRecord
+from orven.core.skills import Skill, format_skill_catalog
+from orven.core.tools import ConfirmFunc, LoadSkillTool, ToolContext, ToolRegistry
+from orven.core.trace import StopReason, ToolCallRequest, ToolInvocationRecord, TurnRecord
 from orven.providers import ChatRequest, ModelProvider, ProviderError
 
 OnTurnFunc = Callable[[TurnRecord], None]
@@ -28,6 +29,7 @@ class Agent:
         root_dir: Path | None = None,
         max_iterations: int = DEFAULT_MAX_ITERATIONS,
         system_prompt: str | None = DEFAULT_SYSTEM_PROMPT,
+        skills: list[Skill] | None = None,
         on_turn: OnTurnFunc | None = None,
     ) -> None:
         self.provider = provider
@@ -37,6 +39,12 @@ class Agent:
         self.root_dir = root_dir or Path.cwd()
         self.max_iterations = max_iterations
         self.on_turn = on_turn
+        self.skills = list(skills or [])
+        if self.skills:
+            self.tools.register(LoadSkillTool(self.skills))
+
+        if system_prompt and self.skills:
+            system_prompt = f"{system_prompt}\n\n{format_skill_catalog(self.skills)}"
         if system_prompt:
             self.conversation.ensure_system_message(system_prompt)
 
@@ -144,7 +152,7 @@ class Agent:
         assistant_content: str,
         requested_tool_calls: list[ToolCallRequest],
         tool_invocations: list[ToolInvocationRecord],
-        stop_reason: str,
+        stop_reason: StopReason,
     ) -> None:
         if self.on_turn is None:
             return
