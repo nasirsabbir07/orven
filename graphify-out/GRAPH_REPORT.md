@@ -1,16 +1,16 @@
 # Graph Report - orven  (2026-07-22)
 
 ## Corpus Check
-- 40 files · ~8,716 words
+- 40 files · ~8,956 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 330 nodes · 840 edges · 27 communities (18 shown, 9 thin omitted)
-- Extraction: 70% EXTRACTED · 30% INFERRED · 0% AMBIGUOUS · INFERRED: 252 edges (avg confidence: 0.75)
+- 336 nodes · 861 edges · 27 communities (18 shown, 9 thin omitted)
+- Extraction: 70% EXTRACTED · 30% INFERRED · 0% AMBIGUOUS · INFERRED: 256 edges (avg confidence: 0.75)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a5084f79`
+- Built from commit: `cbfe20c1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -37,7 +37,7 @@
 - [[_COMMUNITY_general.py|general.py]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `load_config()` - 34 edges
+1. `load_config()` - 38 edges
 2. `ProviderError` - 30 edges
 3. `Agent` - 28 edges
 4. `ToolContext` - 26 edges
@@ -46,18 +46,18 @@
 7. `BaseTool` - 19 edges
 8. `OllamaProvider` - 19 edges
 9. `ScriptedProvider` - 19 edges
-10. `discover_skills()` - 18 edges
+10. `run_shell()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `test_default_config_path_uses_orven_config_file()` --calls--> `default_config_path()`  [INFERRED]
   tests/test_config.py → src/orven/config/settings.py
 - `test_model_set_command()` --calls--> `load_config()`  [INFERRED]
   tests/test_cli.py → src/orven/config/settings.py
+- `test_root_command_lists_skills()` --calls--> `load_config()`  [INFERRED]
+  tests/test_cli.py → src/orven/config/settings.py
 - `test_root_command_selects_model()` --calls--> `load_config()`  [INFERRED]
   tests/test_cli.py → src/orven/config/settings.py
 - `test_root_command_selects_provider()` --calls--> `load_config()`  [INFERRED]
-  tests/test_cli.py → src/orven/config/settings.py
-- `test_skills_list_and_show_commands()` --calls--> `load_config()`  [INFERRED]
   tests/test_cli.py → src/orven/config/settings.py
 
 ## Import Cycles
@@ -66,8 +66,8 @@
 ## Communities (27 total, 9 thin omitted)
 
 ### Community 0 - "Config & Shell Commands"
-Cohesion: 0.09
-Nodes (51): BaseSettings, InputFunc, format_config(), Return user-facing resolved configuration lines., Show resolved local configuration., show_config(), current_model(), list_models() (+43 more)
+Cohesion: 0.08
+Nodes (55): BaseSettings, InputFunc, format_config(), Return user-facing resolved configuration lines., Show resolved local configuration., show_config(), current_model(), list_models() (+47 more)
 
 ### Community 1 - "Provider Abstraction & Ollama Backend"
 Cohesion: 0.08
@@ -79,7 +79,7 @@ Nodes (25): BaseModel, BaseTool, Any, Execute the tool with validated arguments.
 
 ### Community 3 - "CLI Doctor & Entry Tests"
 Cohesion: 0.07
-Nodes (20): doctor(), Check the local Orven environment., ModelInfo, Return models available to this provider., FailingProvider, ModelListProvider, MonkeyPatch, Path (+12 more)
+Nodes (22): doctor(), Check the local Orven environment., ModelInfo, Return models available to this provider., FailingProvider, ModelListProvider, MonkeyPatch, Path (+14 more)
 
 ### Community 4 - "Agent Execution & Tool Registry"
 Cohesion: 0.35
@@ -118,13 +118,13 @@ Nodes (6): chat(), _make_ask_confirm(), ConfirmFunc, Start an interactive Orven 
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `load_config()` connect `Config & Shell Commands` to `Skills Command`, `CLI Doctor & Entry Tests`, `Model & Provider Selection Commands`?**
-  _High betweenness centrality (0.195) - this node is a cross-community bridge._
-- **Why does `ProviderError` connect `Provider Abstraction & Ollama Backend` to `Config & Shell Commands`, `CLI Doctor & Entry Tests`, `Agent Execution & Tool Registry`, `General CLI Commands`, `Skills Command`?**
-  _High betweenness centrality (0.120) - this node is a cross-community bridge._
+  _High betweenness centrality (0.206) - this node is a cross-community bridge._
 - **Why does `ask()` connect `Skills Command` to `Config & Shell Commands`, `Provider Abstraction & Ollama Backend`, `general.py`, `Agent Execution & Tool Registry`?**
-  _High betweenness centrality (0.107) - this node is a cross-community bridge._
-- **Are the 24 inferred relationships involving `load_config()` (e.g. with `show_config()` and `doctor()`) actually correct?**
-  _`load_config()` has 24 INFERRED edges - model-reasoned connections that need verification._
+  _High betweenness centrality (0.120) - this node is a cross-community bridge._
+- **Why does `ProviderError` connect `Provider Abstraction & Ollama Backend` to `Config & Shell Commands`, `CLI Doctor & Entry Tests`, `Agent Execution & Tool Registry`, `General CLI Commands`, `Skills Command`?**
+  _High betweenness centrality (0.119) - this node is a cross-community bridge._
+- **Are the 28 inferred relationships involving `load_config()` (e.g. with `show_config()` and `doctor()`) actually correct?**
+  _`load_config()` has 28 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 19 inferred relationships involving `ProviderError` (e.g. with `doctor()` and `ask()`) actually correct?**
   _`ProviderError` has 19 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 21 inferred relationships involving `Agent` (e.g. with `ask()` and `Conversation`) actually correct?**

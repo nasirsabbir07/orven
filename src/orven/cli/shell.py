@@ -11,6 +11,7 @@ from orven.cli.tracing import print_turn_receipt
 from orven.config import ConfigLoadError, load_config, set_provider_model, set_provider_name
 from orven.core import Agent, Conversation
 from orven.core.skills import (
+    Skill,
     discover_skills,
     project_agents_skills_dir,
     project_local_skills_dir,
@@ -27,6 +28,8 @@ HELP_TEXT = """Commands:
   /providers List supported providers
   /models    List local models
   /model     Select a local model
+  /skills    List local skills
+  /skill     Show a local skill's instructions
   /exit      Exit Orven
 
 Type a task or question and press Enter to submit it."""
@@ -41,6 +44,8 @@ SLASH_COMMANDS = [
     "/provider",
     "/models",
     "/model",
+    "/skills",
+    "/skill",
     "/exit",
     "/quit",
 ]
@@ -98,6 +103,12 @@ def run_shell(input_func: InputFunc | None = None, *, verbose: bool = False) -> 
             _select_model(prompt)
             agent = None
             continue
+        if command == "/skills":
+            _show_skills()
+            continue
+        if command == "/skill":
+            _show_skill(prompt)
+            continue
         if command == "hello":
             typer.echo("Hello from Orven!")
             continue
@@ -125,11 +136,7 @@ def _default_prompt(message: str) -> str:
 def _build_agent(conversation: Conversation, *, verbose: bool = False) -> Agent:
     loaded_config = load_config()
     provider = create_provider(loaded_config.settings.provider)
-    skills = discover_skills(
-        project_local_skills_dir(),
-        project_agents_skills_dir(),
-        loaded_config.settings.skills_dir,
-    )
+    skills = _discover_shell_skills(loaded_config.settings.skills_dir)
     return Agent(
         provider,
         conversation,
@@ -294,3 +301,47 @@ def _available_models() -> list[ModelInfo]:
     loaded_config = load_config()
     provider = create_provider(loaded_config.settings.provider)
     return provider.list_models()
+
+
+def _discover_shell_skills(skills_dir: Path | None) -> list[Skill]:
+    return discover_skills(project_local_skills_dir(), project_agents_skills_dir(), skills_dir)
+
+
+def _show_skills() -> None:
+    try:
+        loaded_config = load_config()
+    except ConfigLoadError as error:
+        typer.echo(str(error))
+        return
+
+    skills = _discover_shell_skills(loaded_config.settings.skills_dir)
+    if not skills:
+        typer.echo("No local skills are configured yet.")
+        return
+
+    for skill in skills:
+        typer.echo(f"{skill.name}: {skill.description}")
+
+
+def _show_skill(prompt: InputFunc) -> None:
+    try:
+        loaded_config = load_config()
+    except ConfigLoadError as error:
+        typer.echo(str(error))
+        return
+
+    skills = {skill.name: skill for skill in _discover_shell_skills(loaded_config.settings.skills_dir)}
+    if not skills:
+        typer.echo("No local skills are configured yet.")
+        return
+
+    for name in skills:
+        typer.echo(name)
+
+    choice = prompt("skill name").strip()
+    skill = skills.get(choice)
+    if skill is None:
+        typer.echo(f"Unknown skill '{choice}'.")
+        return
+
+    typer.echo(skill.body)

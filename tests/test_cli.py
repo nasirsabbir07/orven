@@ -76,6 +76,8 @@ def test_root_command_shows_slash_help() -> None:
     assert "/exit" in result.output
     assert "/provider" in result.output
     assert "/providers" in result.output
+    assert "/skills" in result.output
+    assert "/skill" in result.output
 
 
 def test_root_command_shows_config() -> None:
@@ -122,6 +124,42 @@ def test_root_command_selects_model(monkeypatch: pytest.MonkeyPatch, tmp_path: P
 
     assert result.exit_code == 0
     assert "Selected model: gemma4:26b" in result.output
+
+
+def test_root_command_lists_skills(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    skills_dir = tmp_path / "skills"
+    skill_dir = skills_dir / "code-review"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        "\n".join(["---", "name: code-review", "description: Reviews code.", "---", "Check bugs."]),
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setattr(shell, "load_config", lambda: load_config(config_path))
+    monkeypatch.setenv("ORVEN_SKILLS_DIR", str(skills_dir))
+
+    result = runner.invoke(app, input="/skills\n/exit\n")
+
+    assert result.exit_code == 0
+    assert "code-review: Reviews code." in result.output
+
+
+def test_root_command_shows_skill(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    skills_dir = tmp_path / "skills"
+    skill_dir = skills_dir / "code-review"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        "\n".join(["---", "name: code-review", "description: Reviews code.", "---", "Check bugs."]),
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setattr(shell, "load_config", lambda: load_config(config_path))
+    monkeypatch.setenv("ORVEN_SKILLS_DIR", str(skills_dir))
+
+    result = runner.invoke(app, input="/skill\ncode-review\n/exit\n")
+
+    assert result.exit_code == 0
+    assert "Check bugs." in result.output
 
 
 def test_run_command_starts_interactive_shell() -> None:
