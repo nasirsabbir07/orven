@@ -40,8 +40,8 @@
     "semantic_hash": "cca95c8cfdc9a4cecaa85def4f5aedab"
   },
   "src/orven/cli/commands/general.py": {
-    "mtime": 1784656973.0349183,
-    "ast_hash": "1432ae5624b1fa389bfbd182b2879aca",
+    "mtime": 1784738335.8027732,
+    "ast_hash": "c82d87a20a5f81f138535910302429b2",
     "semantic_hash": ""
   },
   "src/orven/cli/commands/model.py": {
@@ -55,9 +55,9 @@
     "semantic_hash": "db4ed448ea296059aa55e42952c1b6ea"
   },
   "src/orven/cli/commands/skills.py": {
-    "mtime": 1783961754.9260094,
-    "ast_hash": "a1b52343266f6c0b93de07db62b1ecb9",
-    "semantic_hash": "a1b52343266f6c0b93de07db62b1ecb9"
+    "mtime": 1784738335.8027732,
+    "ast_hash": "0201aa41d361f17b414112ffe11b42c4",
+    "semantic_hash": ""
   },
   "src/orven/cli/commands/workflows.py": {
     "mtime": 1783961755.9241154,
@@ -65,8 +65,8 @@
     "semantic_hash": "571ea5a05abe52bf1ca106a53707cc77"
   },
   "src/orven/cli/shell.py": {
-    "mtime": 1784657011.307198,
-    "ast_hash": "c5b58a3f2aecdef4662acbbff3c66630",
+    "mtime": 1784738335.8037722,
+    "ast_hash": "3b06b9e231e0730d9cf0b8f6b9e80463",
     "semantic_hash": ""
   },
   "src/orven/config/__init__.py": {
@@ -80,13 +80,13 @@
     "semantic_hash": "1df3aab82a8a4d2af2b5e3042a00afb2"
   },
   "src/orven/core/__init__.py": {
-    "mtime": 1784656348.6940112,
-    "ast_hash": "c43e0d622f04d688ac46553f8736b635",
+    "mtime": 1784738335.8037722,
+    "ast_hash": "571dc74558a5450fe1171b543d9c7130",
     "semantic_hash": ""
   },
   "src/orven/core/agent.py": {
-    "mtime": 1784656339.8120937,
-    "ast_hash": "cf58909826b44a63c11dabcf5532ab59",
+    "mtime": 1784738335.804773,
+    "ast_hash": "139f53a4145e0e6aebde5c1f86d19b29",
     "semantic_hash": ""
   },
   "src/orven/core/conversation.py": {
@@ -95,9 +95,9 @@
     "semantic_hash": "a23e45c60192140752cdf7b5dbe195fc"
   },
   "src/orven/core/tools/__init__.py": {
-    "mtime": 1784137159.315532,
-    "ast_hash": "f0e7b1f3025b778268aab3dd042232d5",
-    "semantic_hash": "f0e7b1f3025b778268aab3dd042232d5"
+    "mtime": 1784738335.804773,
+    "ast_hash": "c5bafc6a6bd736c88c0718839c881b2f",
+    "semantic_hash": ""
   },
   "src/orven/core/tools/base.py": {
     "mtime": 1784137134.5579238,
@@ -140,13 +140,13 @@
     "semantic_hash": "adc80fd011d067e4cd35af54d19bc62d"
   },
   "tests/test_agent.py": {
-    "mtime": 1784656404.9884665,
-    "ast_hash": "14dd67d21832602be6194ef4f44d4c36",
+    "mtime": 1784738335.8057718,
+    "ast_hash": "784d1fec9a4b85d00c7002516ce8db94",
     "semantic_hash": ""
   },
   "tests/test_cli.py": {
-    "mtime": 1784657068.681002,
-    "ast_hash": "68aef3348600c32e4a13cf405db0b7b7",
+    "mtime": 1784738335.8057718,
+    "ast_hash": "0be583acde6e20a3afa4e28e6e150eb7",
     "semantic_hash": ""
   },
   "tests/test_config.py": {
@@ -265,13 +265,28 @@
     "semantic_hash": "c87c1c57435e1af63ad645cf061a6c2d"
   },
   "src/orven/core/trace.py": {
-    "mtime": 1784656287.8836567,
-    "ast_hash": "75cfba660e5dbdbf720ea1a1dfbcf5b3",
+    "mtime": 1784657991.2945912,
+    "ast_hash": "92980fc1f4e2126db09efa9a3dc34ebc",
     "semantic_hash": ""
   },
   "src/orven/cli/tracing.py": {
-    "mtime": 1784656958.7874694,
-    "ast_hash": "7ee4cc33ae63ee3b87134368905d73bb",
+    "mtime": 1784657991.2925923,
+    "ast_hash": "b4edff2a13a05401e7872e68e070a5ce",
+    "semantic_hash": ""
+  },
+  "src/orven/core/skills.py": {
+    "mtime": 1784737112.2256746,
+    "ast_hash": "80c2e370df8a5c711d91afd7a405f7e6",
+    "semantic_hash": ""
+  },
+  "src/orven/core/tools/skills.py": {
+    "mtime": 1784737161.7826538,
+    "ast_hash": "922723ca794a9df0421f34e93f40932c",
+    "semantic_hash": ""
+  },
+  "tests/test_skills.py": {
+    "mtime": 1784738215.918786,
+    "ast_hash": "8b30dd89dbf1daec0b9139321150b9b0",
     "semantic_hash": ""
   }
 }

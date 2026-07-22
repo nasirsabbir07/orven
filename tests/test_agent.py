@@ -5,6 +5,7 @@ import pytest
 
 from orven.core import Agent, TurnRecord
 from orven.core.conversation import ToolCall, ToolCallFunction
+from orven.core.skills import Skill
 from orven.core.tools import ToolRegistry, default_tools
 from orven.core.tools.filesystem import ListDirTool
 from orven.providers import ChatRequest, ChatResponse, Message, ProviderError
@@ -227,6 +228,41 @@ def test_agent_emits_receipt_before_raising_on_stagnant_loop(tmp_path: Path) -> 
     assert [receipt.stop_reason for receipt in receipts] == ["continue", "stagnant_loop"]
     assert receipts[-1].requested_tool_calls[0].name == "list_dir"
     assert receipts[-1].tool_invocations == []
+
+
+def test_agent_injects_skill_catalog_and_loads_skill_on_demand(tmp_path: Path) -> None:
+    skill = Skill(
+        name="code-review",
+        description="Reviews code for bugs.",
+        body="Check for edge cases and off-by-one errors.",
+        path=tmp_path / "SKILL.md",
+    )
+    provider = ScriptedProvider(
+        [_tool_call_response("load_skill", {"name": "code-review"}), _final_text("done")]
+    )
+    agent = Agent(provider, tools=ToolRegistry(default_tools()), root_dir=tmp_path, skills=[skill])
+
+    assert agent.respond("review this code") == "done"
+
+    system_message = agent.conversation.messages[0]
+    assert "code-review: Reviews code for bugs." in system_message.content
+
+    tool_message = agent.conversation.messages[3]
+    assert tool_message.content == "Check for edge cases and off-by-one errors."
+
+
+def test_agent_reports_unknown_skill_name_without_crashing(tmp_path: Path) -> None:
+    skill = Skill(name="code-review", description="d", body="b", path=tmp_path / "SKILL.md")
+    provider = ScriptedProvider(
+        [_tool_call_response("load_skill", {"name": "does-not-exist"}), _final_text("done")]
+    )
+    agent = Agent(provider, tools=ToolRegistry(default_tools()), root_dir=tmp_path, skills=[skill])
+
+    assert agent.respond("review this code") == "done"
+
+    tool_message = agent.conversation.messages[3]
+    assert "Unknown skill" in tool_message.content
+    assert "code-review" in tool_message.content
 
 
 def test_agent_receipt_marks_unknown_tool_invocation_as_not_ok(tmp_path: Path) -> None:
