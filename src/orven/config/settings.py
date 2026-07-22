@@ -24,6 +24,7 @@ class ProviderSettings(BaseModel):
     name: str = "ollama"
     base_url: str = "http://localhost:11434"
     model: str | None = None
+    context_length: int | None = None
 
 
 class OrvenSettings(BaseSettings):
@@ -146,6 +147,11 @@ def _with_env_overrides(config: dict[str, Any]) -> dict[str, Any]:
         os.getenv(f"{ENV_PREFIX}PROVIDER__BASE_URL"),
     )
     _set_path_value(merged, ("provider", "model"), os.getenv(f"{ENV_PREFIX}PROVIDER__MODEL"))
+    _set_path_value(
+        merged,
+        ("provider", "context_length"),
+        os.getenv(f"{ENV_PREFIX}PROVIDER__CONTEXT_LENGTH"),
+    )
     _set_path_value(merged, ("skills_dir",), os.getenv(f"{ENV_PREFIX}SKILLS_DIR"))
     _set_path_value(merged, ("workflows_dir",), os.getenv(f"{ENV_PREFIX}WORKFLOWS_DIR"))
 

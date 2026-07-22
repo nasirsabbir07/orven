@@ -47,6 +47,29 @@ def test_config_file_loads_typed_values(tmp_path: Path) -> None:
     assert loaded_config.settings.skills_dir == skills_dir
 
 
+def test_config_file_loads_provider_context_length(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        "\n".join(["[provider]", 'name = "ollama"', "context_length = 8192"]),
+        encoding="utf-8",
+    )
+
+    loaded_config = load_config(config_path)
+
+    assert loaded_config.settings.provider.context_length == 8192
+
+
+def test_env_overrides_provider_context_length(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setenv("ORVEN_PROVIDER__CONTEXT_LENGTH", "16384")
+
+    loaded_config = load_config(config_path)
+
+    assert loaded_config.settings.provider.context_length == 16384
+
+
 def test_env_overrides_config_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text(

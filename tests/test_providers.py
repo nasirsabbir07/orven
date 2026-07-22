@@ -37,6 +37,36 @@ def test_ollama_provider_sends_chat_request() -> None:
     assert response.has_tool_calls is False
 
 
+def test_ollama_provider_sends_num_ctx_when_context_length_configured() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert b'"options":{"num_ctx":8192}' in request.read()
+        return httpx.Response(
+            200,
+            json={"message": {"role": "assistant", "content": "ok"}, "model": "llama3.2"},
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(
+        base_url="http://ollama.test", model="llama3.2", context_length=8192, client=client
+    )
+
+    provider.chat(ChatRequest(messages=[Message(role="user", content="hello")]))
+
+
+def test_ollama_provider_omits_options_when_context_length_unset() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert b'"options"' not in request.read()
+        return httpx.Response(
+            200,
+            json={"message": {"role": "assistant", "content": "ok"}, "model": "llama3.2"},
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(base_url="http://ollama.test", model="llama3.2", client=client)
+
+    provider.chat(ChatRequest(messages=[Message(role="user", content="hello")]))
+
+
 def test_ollama_provider_uses_first_local_model_when_unconfigured() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/api/tags":

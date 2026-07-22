@@ -27,10 +27,12 @@ class OllamaProvider(ModelProvider):
         *,
         base_url: str,
         model: str | None = None,
+        context_length: int | None = None,
         client: httpx.Client | None = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.model = model
+        self.context_length = context_length
         self._client = client or httpx.Client(timeout=60.0)
         self._owns_client = client is None
 
@@ -48,6 +50,8 @@ class OllamaProvider(ModelProvider):
         }
         if request.tools:
             payload["tools"] = [tool.to_openai_function() for tool in request.tools]
+        if self.context_length is not None:
+            payload["options"] = {"num_ctx": self.context_length}
 
         tools_requested = bool(request.tools)
 
