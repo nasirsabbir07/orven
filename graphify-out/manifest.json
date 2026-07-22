@@ -40,8 +40,8 @@
     "semantic_hash": "cca95c8cfdc9a4cecaa85def4f5aedab"
   },
   "src/orven/cli/commands/general.py": {
-    "mtime": 1784741143.5898654,
-    "ast_hash": "1616a4f0f2114584cb6a24e9c73e195b",
+    "mtime": 1784745532.9025798,
+    "ast_hash": "d0d25b2172e3895862c4737aed1b215c",
     "semantic_hash": ""
   },
   "src/orven/cli/commands/model.py": {
@@ -65,8 +65,8 @@
     "semantic_hash": "571ea5a05abe52bf1ca106a53707cc77"
   },
   "src/orven/cli/shell.py": {
-    "mtime": 1784741514.6497838,
-    "ast_hash": "5a39c4a0a4d1f4e24b9354e38beb6027",
+    "mtime": 1784745554.9517188,
+    "ast_hash": "3883679d052f35df7b3da1a748643362",
     "semantic_hash": ""
   },
   "src/orven/config/__init__.py": {
@@ -145,8 +145,8 @@
     "semantic_hash": ""
   },
   "tests/test_cli.py": {
-    "mtime": 1784741567.7722826,
-    "ast_hash": "40bdcb0d016c9cf9c3bf108b89fe9232",
+    "mtime": 1784745588.5300071,
+    "ast_hash": "e4700ba357f9a1129ec680fdc623f956",
     "semantic_hash": ""
   },
   "tests/test_config.py": {

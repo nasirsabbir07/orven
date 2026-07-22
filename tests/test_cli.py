@@ -323,6 +323,36 @@ class ToolCallThenDoneProvider:
         return []
 
 
+class EmptyFinalAnswerProvider:
+    name = "test"
+
+    def chat(
+        self, request: ChatRequest, *, on_token: Callable[[str], None] | None = None
+    ) -> ChatResponse:
+        return ChatResponse(message=Message(role="assistant", content=""), model="test-model", provider="test")
+
+    def list_models(self) -> list[ModelInfo]:
+        return []
+
+
+def test_ask_command_flags_empty_model_response(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(general, "create_provider", lambda _: EmptyFinalAnswerProvider())
+
+    result = runner.invoke(app, ["ask", "hello"])
+
+    assert result.exit_code == 0
+    assert "(model returned an empty response)" in result.output
+
+
+def test_root_command_flags_empty_model_response(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(shell, "create_provider", lambda _: EmptyFinalAnswerProvider())
+
+    result = runner.invoke(app, input="summarize this repo\n/exit\n")
+
+    assert result.exit_code == 0
+    assert "(model returned an empty response)" in result.output
+
+
 def test_ask_command_prints_turn_receipts_when_verbose(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(general, "create_provider", lambda _: ToolCallThenDoneProvider())
 

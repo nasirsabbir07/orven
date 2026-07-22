@@ -60,7 +60,7 @@ def ask(
             skills=skills,
             on_turn=print_turn_receipt if verbose else None,
         )
-        agent.respond(prompt, on_token=lambda token: typer.echo(token, nl=False))
+        response = agent.respond(prompt, on_token=lambda token: typer.echo(token, nl=False))
     except (ConfigLoadError, ProviderError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(code=1) from error
@@ -69,6 +69,8 @@ def ask(
         typer.echo("Cancelled.", err=True)
         raise typer.Exit(code=130) from None
 
+    if not response.strip():
+        typer.echo("(model returned an empty response)")
     typer.echo()
 
 

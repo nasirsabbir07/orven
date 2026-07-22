@@ -157,7 +157,7 @@ def _shell_confirm(message: str) -> bool:
 
 def _send_prompt(agent: Agent, prompt: str) -> None:
     try:
-        agent.respond(prompt, on_token=lambda token: typer.echo(token, nl=False))
+        response = agent.respond(prompt, on_token=lambda token: typer.echo(token, nl=False))
     except KeyboardInterrupt:
         typer.echo()
         typer.echo("Cancelled.")
@@ -167,6 +167,8 @@ def _send_prompt(agent: Agent, prompt: str) -> None:
         typer.echo(str(error))
         return
 
+    if not response.strip():
+        typer.echo("(model returned an empty response)")
     typer.echo()
 
 
