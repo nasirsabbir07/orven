@@ -10,7 +10,11 @@ from orven.cli.commands.config import format_config
 from orven.cli.tracing import print_turn_receipt
 from orven.config import ConfigLoadError, load_config, set_provider_model, set_provider_name
 from orven.core import Agent, Conversation
-from orven.core.skills import discover_skills, project_local_skills_dir
+from orven.core.skills import (
+    discover_skills,
+    project_agents_skills_dir,
+    project_local_skills_dir,
+)
 from orven.core.tools import ToolRegistry, default_tools
 from orven.providers import ModelInfo, ProviderError, create_provider
 
@@ -121,7 +125,11 @@ def _default_prompt(message: str) -> str:
 def _build_agent(conversation: Conversation, *, verbose: bool = False) -> Agent:
     loaded_config = load_config()
     provider = create_provider(loaded_config.settings.provider)
-    skills = discover_skills(project_local_skills_dir(), loaded_config.settings.skills_dir)
+    skills = discover_skills(
+        project_local_skills_dir(),
+        project_agents_skills_dir(),
+        loaded_config.settings.skills_dir,
+    )
     return Agent(
         provider,
         conversation,

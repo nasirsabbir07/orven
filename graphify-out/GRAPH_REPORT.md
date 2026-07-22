@@ -1,16 +1,16 @@
 # Graph Report - orven  (2026-07-22)
 
 ## Corpus Check
-- 40 files · ~8,595 words
+- 40 files · ~8,716 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 326 nodes · 823 edges · 27 communities (18 shown, 9 thin omitted)
-- Extraction: 70% EXTRACTED · 30% INFERRED · 0% AMBIGUOUS · INFERRED: 244 edges (avg confidence: 0.75)
+- 330 nodes · 840 edges · 27 communities (18 shown, 9 thin omitted)
+- Extraction: 70% EXTRACTED · 30% INFERRED · 0% AMBIGUOUS · INFERRED: 252 edges (avg confidence: 0.75)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5c73511c`
+- Built from commit: `a5084f79`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -46,7 +46,7 @@
 7. `BaseTool` - 19 edges
 8. `OllamaProvider` - 19 edges
 9. `ScriptedProvider` - 19 edges
-10. `default_tools()` - 18 edges
+10. `discover_skills()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `test_default_config_path_uses_orven_config_file()` --calls--> `default_config_path()`  [INFERRED]
@@ -82,16 +82,16 @@ Cohesion: 0.07
 Nodes (20): doctor(), Check the local Orven environment., ModelInfo, Return models available to this provider., FailingProvider, ModelListProvider, MonkeyPatch, Path (+12 more)
 
 ### Community 4 - "Agent Execution & Tool Registry"
-Cohesion: 0.31
-Nodes (23): ask(), Send a prompt to the configured model provider., Agent, default_tools(), Tools enabled by default. Additional tools (e.g. run_shell) can be appended here, ToolRegistry, _final_text(), Path (+15 more)
+Cohesion: 0.35
+Nodes (21): Agent, default_tools(), Tools enabled by default. Additional tools (e.g. run_shell) can be appended here, ToolRegistry, _final_text(), Path, ScriptedProvider, test_agent_converts_confirmation_error_into_tool_result() (+13 more)
 
 ### Community 6 - "Conversation History"
-Cohesion: 0.24
-Nodes (4): Conversation, EchoProvider, test_agent_injects_system_prompt_by_default(), test_agent_records_conversation_messages()
+Cohesion: 0.16
+Nodes (7): OnTurnFunc, ConfirmFunc, Path, Conversation, EchoProvider, test_agent_injects_system_prompt_by_default(), test_agent_records_conversation_messages()
 
 ### Community 7 - "General CLI Commands"
-Cohesion: 0.19
-Nodes (9): print_turn_receipt(), Print a one-line-per-tool-call summary of a turn to stderr., _truncate(), _describe_tool_call(), _tool_call_signature(), ToolCallRequest, ToolInvocationRecord, TurnRecord (+1 more)
+Cohesion: 0.18
+Nodes (10): print_turn_receipt(), Print a one-line-per-tool-call summary of a turn to stderr., _truncate(), _describe_tool_call(), _tool_call_signature(), ToolCallRequest, ToolInvocationRecord, TurnRecord (+2 more)
 
 ### Community 8 - "README Project Overview"
 Cohesion: 0.20
@@ -102,8 +102,8 @@ Cohesion: 0.50
 Nodes (3): Context, main(), Orven command-line interface.
 
 ### Community 10 - "Skills Command"
-Cohesion: 0.13
-Nodes (27): OnTurnFunc, _discover(), list_skills(), List discovered local skills., Show the full instructions for a local skill., show_skill(), ConfirmFunc, Path (+19 more)
+Cohesion: 0.15
+Nodes (29): ask(), Send a prompt to the configured model provider., _discover(), list_skills(), List discovered local skills., Show the full instructions for a local skill., show_skill(), _discover_in_dir() (+21 more)
 
 ### Community 26 - "general.py"
 Cohesion: 0.22
@@ -117,12 +117,12 @@ Nodes (6): chat(), _make_ask_confirm(), ConfirmFunc, Start an interactive Orven 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `load_config()` connect `Config & Shell Commands` to `Skills Command`, `CLI Doctor & Entry Tests`, `Agent Execution & Tool Registry`, `Model & Provider Selection Commands`?**
-  _High betweenness centrality (0.196) - this node is a cross-community bridge._
-- **Why does `ProviderError` connect `Provider Abstraction & Ollama Backend` to `Config & Shell Commands`, `CLI Doctor & Entry Tests`, `Agent Execution & Tool Registry`, `General CLI Commands`?**
-  _High betweenness centrality (0.121) - this node is a cross-community bridge._
-- **Why does `ask()` connect `Agent Execution & Tool Registry` to `Config & Shell Commands`, `Provider Abstraction & Ollama Backend`, `general.py`, `Skills Command`?**
-  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+- **Why does `load_config()` connect `Config & Shell Commands` to `Skills Command`, `CLI Doctor & Entry Tests`, `Model & Provider Selection Commands`?**
+  _High betweenness centrality (0.195) - this node is a cross-community bridge._
+- **Why does `ProviderError` connect `Provider Abstraction & Ollama Backend` to `Config & Shell Commands`, `CLI Doctor & Entry Tests`, `Agent Execution & Tool Registry`, `General CLI Commands`, `Skills Command`?**
+  _High betweenness centrality (0.120) - this node is a cross-community bridge._
+- **Why does `ask()` connect `Skills Command` to `Config & Shell Commands`, `Provider Abstraction & Ollama Backend`, `general.py`, `Agent Execution & Tool Registry`?**
+  _High betweenness centrality (0.107) - this node is a cross-community bridge._
 - **Are the 24 inferred relationships involving `load_config()` (e.g. with `show_config()` and `doctor()`) actually correct?**
   _`load_config()` has 24 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 19 inferred relationships involving `ProviderError` (e.g. with `doctor()` and `ask()`) actually correct?**

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 SKILL_FILE_NAME = "SKILL.md"
 PROJECT_SKILLS_DIR_NAME = Path(".orven") / "skills"
+AGENTS_SKILLS_DIR_NAME = Path(".agents") / "skills"
 
 
 class Skill(BaseModel):
@@ -18,6 +19,10 @@ class Skill(BaseModel):
 
 def project_local_skills_dir(root: Path | None = None) -> Path:
     return (root or Path.cwd()) / PROJECT_SKILLS_DIR_NAME
+
+
+def project_agents_skills_dir(root: Path | None = None) -> Path:
+    return (root or Path.cwd()) / AGENTS_SKILLS_DIR_NAME
 
 
 def discover_skills(*dirs: Path | None) -> list[Skill]:

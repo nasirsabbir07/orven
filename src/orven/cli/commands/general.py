@@ -7,7 +7,11 @@ from orven.cli.shell import run_shell
 from orven.cli.tracing import print_turn_receipt
 from orven.config import ConfigLoadError, load_config
 from orven.core import Agent
-from orven.core.skills import discover_skills, project_local_skills_dir
+from orven.core.skills import (
+    discover_skills,
+    project_agents_skills_dir,
+    project_local_skills_dir,
+)
 from orven.core.tools import ConfirmFunc, ToolRegistry, default_tools
 from orven.providers import ProviderError, create_provider
 
@@ -43,7 +47,11 @@ def ask(
     try:
         loaded_config = load_config()
         provider = create_provider(loaded_config.settings.provider)
-        skills = discover_skills(project_local_skills_dir(), loaded_config.settings.skills_dir)
+        skills = discover_skills(
+            project_local_skills_dir(),
+            project_agents_skills_dir(),
+            loaded_config.settings.skills_dir,
+        )
         agent = Agent(
             provider,
             tools=ToolRegistry(default_tools()),

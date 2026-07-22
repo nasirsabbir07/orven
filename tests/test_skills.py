@@ -1,6 +1,11 @@
 from pathlib import Path
 
-from orven.core.skills import discover_skills, format_skill_catalog
+from orven.core.skills import (
+    discover_skills,
+    format_skill_catalog,
+    project_agents_skills_dir,
+    project_local_skills_dir,
+)
 
 
 def _write_skill(directory: Path, folder_name: str, *, name: str, description: str, body: str) -> None:
@@ -84,6 +89,45 @@ def test_discover_skills_merges_multiple_dirs(tmp_path: Path) -> None:
     skills = discover_skills(project_dir, user_dir, None)
 
     assert {skill.name for skill in skills} == {"one", "two"}
+
+
+def test_discover_skills_finds_agents_skills_dir(tmp_path: Path) -> None:
+    _write_skill(
+        tmp_path / ".agents" / "skills",
+        "code-review",
+        name="code-review",
+        description="Reviews code.",
+        body="Check for bugs.",
+    )
+
+    skills = discover_skills(project_agents_skills_dir(tmp_path))
+
+    assert len(skills) == 1
+    assert skills[0].name == "code-review"
+
+
+def test_discover_skills_orven_dir_wins_over_agents_dir(tmp_path: Path) -> None:
+    _write_skill(
+        tmp_path / ".orven" / "skills",
+        "shared",
+        name="shared",
+        description="orven version",
+        body="a",
+    )
+    _write_skill(
+        tmp_path / ".agents" / "skills",
+        "shared",
+        name="shared",
+        description="agents version",
+        body="b",
+    )
+
+    skills = discover_skills(
+        project_local_skills_dir(tmp_path), project_agents_skills_dir(tmp_path)
+    )
+
+    assert len(skills) == 1
+    assert skills[0].description == "orven version"
 
 
 def test_format_skill_catalog_lists_name_and_description(tmp_path: Path) -> None:

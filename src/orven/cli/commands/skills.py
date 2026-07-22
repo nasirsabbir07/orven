@@ -1,7 +1,12 @@
 import typer
 
 from orven.config import ConfigLoadError, load_config
-from orven.core.skills import Skill, discover_skills, project_local_skills_dir
+from orven.core.skills import (
+    Skill,
+    discover_skills,
+    project_agents_skills_dir,
+    project_local_skills_dir,
+)
 
 app = typer.Typer(help="Inspect local skills.")
 
@@ -37,4 +42,8 @@ def _discover() -> list[Skill]:
         typer.echo(str(error), err=True)
         raise typer.Exit(code=1) from error
 
-    return discover_skills(project_local_skills_dir(), loaded_config.settings.skills_dir)
+    return discover_skills(
+        project_local_skills_dir(),
+        project_agents_skills_dir(),
+        loaded_config.settings.skills_dir,
+    )
