@@ -187,6 +187,109 @@ def test_ollama_provider_parses_tool_calls() -> None:
     assert call.function.arguments == {"path": "a.txt"}
 
 
+def test_ollama_provider_recovers_tool_call_from_bare_json_content() -> None:
+    def handler(_: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "message": {
+                    "role": "assistant",
+                    "content": '{"name": "list_dir", "arguments": {"path": "."}}',
+                },
+                "model": "qwen2.5-coder",
+            },
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(base_url="http://ollama.test", model="qwen2.5-coder", client=client)
+
+    tool = ToolDefinition(name="list_dir", description="List a directory.", parameters={"type": "object"})
+    response = provider.chat(
+        ChatRequest(messages=[Message(role="user", content="list files")], tools=[tool])
+    )
+
+    assert response.has_tool_calls is True
+    assert response.message.tool_calls is not None
+    call = response.message.tool_calls[0]
+    assert call.function.name == "list_dir"
+    assert call.function.arguments == {"path": "."}
+    assert response.message.content == ""
+
+
+def test_ollama_provider_recovers_tool_call_wrapped_in_tool_call_tags() -> None:
+    def handler(_: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "message": {
+                    "role": "assistant",
+                    "content": '<tool_call>\n{"name": "list_dir", "arguments": {}}\n</tool_call>',
+                },
+                "model": "qwen2.5-coder",
+            },
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(base_url="http://ollama.test", model="qwen2.5-coder", client=client)
+
+    tool = ToolDefinition(name="list_dir", description="List a directory.", parameters={"type": "object"})
+    response = provider.chat(
+        ChatRequest(messages=[Message(role="user", content="list files")], tools=[tool])
+    )
+
+    assert response.has_tool_calls is True
+    call = response.message.tool_calls[0]  # type: ignore[index]
+    assert call.function.name == "list_dir"
+    assert call.function.arguments == {}
+
+
+def test_ollama_provider_ignores_json_content_naming_an_unrequested_tool() -> None:
+    def handler(_: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "message": {
+                    "role": "assistant",
+                    "content": '{"name": "delete_everything", "arguments": {}}',
+                },
+                "model": "qwen2.5-coder",
+            },
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(base_url="http://ollama.test", model="qwen2.5-coder", client=client)
+
+    tool = ToolDefinition(name="list_dir", description="List a directory.", parameters={"type": "object"})
+    response = provider.chat(
+        ChatRequest(messages=[Message(role="user", content="list files")], tools=[tool])
+    )
+
+    assert response.has_tool_calls is False
+    assert response.message.content == '{"name": "delete_everything", "arguments": {}}'
+
+
+def test_ollama_provider_leaves_plain_prose_content_alone_when_tools_requested() -> None:
+    def handler(_: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "message": {"role": "assistant", "content": "Could you clarify what you mean?"},
+                "model": "qwen2.5-coder",
+            },
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(base_url="http://ollama.test", model="qwen2.5-coder", client=client)
+
+    tool = ToolDefinition(name="list_dir", description="List a directory.", parameters={"type": "object"})
+    response = provider.chat(
+        ChatRequest(messages=[Message(role="user", content="explain this")], tools=[tool])
+    )
+
+    assert response.has_tool_calls is False
+    assert response.message.content == "Could you clarify what you mean?"
+
+
 def test_ollama_provider_raises_tools_not_supported_error() -> None:
     def handler(_: httpx.Request) -> httpx.Response:
         return httpx.Response(400, json={"error": "registry.ollama.ai/library/llama2 does not support tools"})

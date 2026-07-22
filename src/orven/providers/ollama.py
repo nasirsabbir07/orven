@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -54,9 +55,12 @@ class OllamaProvider(ModelProvider):
             payload["options"] = {"num_ctx": self.context_length}
 
         tools_requested = bool(request.tools)
+        tool_names = frozenset(tool.name for tool in request.tools)
 
         if on_token is not None:
-            return self._stream_chat(payload, model, on_token, tools_requested=tools_requested)
+            return self._stream_chat(
+                payload, model, on_token, tools_requested=tools_requested, tool_names=tool_names
+            )
 
         try:
             response = self._client.post(f"{self.base_url}/api/chat", json=payload)
@@ -70,7 +74,7 @@ class OllamaProvider(ModelProvider):
         except httpx.HTTPError as error:
             raise ProviderError(f"Ollama request failed: {error}") from error
 
-        return _parse_chat_payload(response.json(), model, self.name)
+        return _parse_chat_payload(response.json(), model, self.name, tool_names)
 
     def _stream_chat(
         self,
@@ -79,6 +83,7 @@ class OllamaProvider(ModelProvider):
         on_token: Callable[[str], None],
         *,
         tools_requested: bool,
+        tool_names: frozenset[str],
     ) -> ChatResponse:
         content_parts: list[str] = []
         final_tool_calls: list[dict[str, Any]] | None = None
@@ -125,6 +130,7 @@ class OllamaProvider(ModelProvider):
             },
             model,
             self.name,
+            tool_names,
         )
 
     def list_models(self) -> list[ModelInfo]:
@@ -182,7 +188,12 @@ def _to_ollama_message(message: Message) -> dict[str, Any]:
     return payload
 
 
-def _parse_chat_payload(data: dict[str, Any], model: str, provider_name: str) -> ChatResponse:
+def _parse_chat_payload(
+    data: dict[str, Any],
+    model: str,
+    provider_name: str,
+    tool_names: frozenset[str] = frozenset(),
+) -> ChatResponse:
     message = data.get("message")
     if not isinstance(message, dict):
         raise ProviderError("Ollama returned an invalid response payload.")
@@ -191,6 +202,11 @@ def _parse_chat_payload(data: dict[str, Any], model: str, provider_name: str) ->
     content = content if isinstance(content, str) else ""
 
     raw_calls = message.get("tool_calls") or []
+    if not raw_calls and tool_names:
+        raw_calls = _fallback_tool_calls_from_content(content, tool_names)
+        if raw_calls:
+            content = ""
+
     tool_calls: list[ToolCall] = []
     for index, raw_call in enumerate(raw_calls):
         function = raw_call.get("function") if isinstance(raw_call, dict) else None
@@ -215,6 +231,54 @@ def _parse_chat_payload(data: dict[str, Any], model: str, provider_name: str) ->
         model=response_model if isinstance(response_model, str) else model,
         provider=provider_name,
     )
+
+
+_TOOL_CALL_TAG_PATTERN = re.compile(r"<tool_call>(.*?)</tool_call>", re.DOTALL)
+
+
+def _fallback_tool_calls_from_content(
+    content: str, tool_names: frozenset[str]
+) -> list[dict[str, Any]]:
+    """Recover a tool call the model attempted as plain text instead of the structured field.
+
+    Some local models (observed with qwen2.5-coder:7b on Ollama 0.32.1) are instructed by
+    their own chat template to wrap tool calls in <tool_call></tool_call> tags, but don't
+    reliably emit that wrapper - Ollama then leaves the raw JSON sitting in `content` instead
+    of populating `message.tool_calls`. Only recovered when the JSON names one of the tools
+    actually offered in this request, to avoid mistaking incidental JSON-shaped prose for a
+    tool call.
+    """
+    candidates = _TOOL_CALL_TAG_PATTERN.findall(content)
+    if not candidates:
+        stripped = content.strip()
+        if stripped.startswith("{") and stripped.endswith("}"):
+            candidates = [stripped]
+
+    calls: list[dict[str, Any]] = []
+    for candidate in candidates:
+        try:
+            parsed = json.loads(candidate.strip())
+        except json.JSONDecodeError:
+            continue
+
+        if not isinstance(parsed, dict):
+            continue
+
+        name = parsed.get("name")
+        if not isinstance(name, str) or name not in tool_names:
+            continue
+
+        arguments = parsed.get("arguments")
+        calls.append(
+            {
+                "function": {
+                    "name": name,
+                    "arguments": arguments if isinstance(arguments, dict) else {},
+                }
+            }
+        )
+
+    return calls
 
 
 def _coerce_arguments(raw_arguments: Any, tool_name: str) -> dict[str, Any]:

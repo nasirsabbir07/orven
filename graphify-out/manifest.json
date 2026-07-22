@@ -135,8 +135,8 @@
     "semantic_hash": ""
   },
   "src/orven/providers/ollama.py": {
-    "mtime": 1784744359.0932045,
-    "ast_hash": "c6fca9aa4ffd966166e9400cc5d554fb",
+    "mtime": 1784746718.495199,
+    "ast_hash": "af7dfb83c5a390ab85ed4ad4048dbe0d",
     "semantic_hash": ""
   },
   "tests/test_agent.py": {
@@ -165,8 +165,8 @@
     "semantic_hash": "a961a3630c71c829a3f7b09a6e0a2b40"
   },
   "tests/test_providers.py": {
-    "mtime": 1784744374.872868,
-    "ast_hash": "83c4f510d39a76921f69aa11158f0e15",
+    "mtime": 1784746758.1232662,
+    "ast_hash": "5a7fefe6736d4018396ff19d875a4f05",
     "semantic_hash": ""
   },
   ".claude/CLAUDE.md": {
